@@ -1,4 +1,4 @@
-# vocto-outcast
+# voctomix-outcasts
 
 Files used with voctomix.
 

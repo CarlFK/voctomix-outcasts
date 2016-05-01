@@ -1,5 +1,6 @@
 #!/bin/bash -ex
 
+# Mostly to confirm the basics is installed and setup properly. 
 cd ../../voctomix
 
 ./voctocore/voctocore.py -i ../vocto-outcasts/configs/light.ini & \
