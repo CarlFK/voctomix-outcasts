@@ -12,7 +12,10 @@ override_dh_auto_build:
 override_dh_auto_install:
 	dh_auto_install
 	# voctomix-outcasts
-	cp -r ingest.py lib \
+	cp -r configs/* \
+	  	$(CURDIR)/debian/voctomix-outcasts/etc/voctomix/
+	cp -r ingest.py generate-cut-list.py record-mixed-av.sh \
+		lib/ tests/ \
 	  	$(CURDIR)/debian/voctomix-outcasts/usr/share/voctomix/clients/
 	ln -s /usr/share/voctomix/clients/ingest.py \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/ingest

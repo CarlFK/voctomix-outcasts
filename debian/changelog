@@ -1,3 +1,9 @@
+voctomix-outcasts (0.1-1ubuntu1) xenial; urgency=medium
+
+  * Added scripts and configs from lca
+
+ -- Carl F Karsten <carl@nextdayvideo.com>  Thu, 05 May 2016 11:28:30 -0500
+
 voctomix-outcasts (0.1-1) wily; urgency=medium
 
   * Initial release. 
