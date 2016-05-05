@@ -19,6 +19,10 @@ override_dh_auto_install:
 	  	$(CURDIR)/debian/voctomix-outcasts/usr/share/voctomix/clients/
 	ln -s /usr/share/voctomix/clients/ingest.py \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/ingest
+	ln -s /usr/share/voctomix/clients/generate-cut-list.py \
+		$(CURDIR)/debian/voctomix-outcasts/usr/bin/generate-cut-list
+	ln -s /usr/share/voctomix/clients/record-mixed-av.sh \
+		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-mixed-av
 
 override_dh_installdocs:
 	dh_installdocs
