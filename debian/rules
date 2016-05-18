@@ -23,6 +23,8 @@ override_dh_auto_install:
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/generate-cut-list
 	ln -s /usr/share/voctomix/clients/record-mixed-av.sh \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-mixed-av
+	ln -s /usr/share/voctomix/clients/record-timestamp.sh \
+		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-timestamp
 
 override_dh_installdocs:
 	dh_installdocs
@@ -33,4 +35,5 @@ override_dh_python3:
 override_dh_clean:
 	dh_clean
 	rm -f voctomix-outcasts.html debian/debhelper-build-stamp
+	rm -rf ./lib/__pycache__
 

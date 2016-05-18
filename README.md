@@ -15,6 +15,8 @@ cd tests
 You should see the gui with 2 bouncing ball test feeds.
 It is also saving to foo.ts
 
+Except it may be broken because I do not have a solid deployment plan. 
+
 For some other related things used in production:
 https://anonscm.debian.org/git/debconf-video/debconf-video.git/tree/src/hdmi2usb/hdmi2usb.py
 
