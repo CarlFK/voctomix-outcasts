@@ -2,7 +2,6 @@
 
 # note: this script will crash at midnight, maybe.
 
-# dir=~/Videos/veyepar/depy/depy2016/dv/$HOSTNAME
 dest_dir=$1
 segment_time=1800
 

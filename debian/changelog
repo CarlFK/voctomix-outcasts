@@ -1,3 +1,9 @@
+voctomix-outcasts (0.2-1ubuntu2) wily; urgency=medium
+
+  * Add example scripts to OS path
+
+ -- Carl F Karsten <carl@nextdayvideo.com>  Wed, 18 May 2016 02:47:44 -0500
+
 voctomix-outcasts (0.2-1ubuntu1) xenial; urgency=medium
 
   * Added scripts and configs from lca
