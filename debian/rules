@@ -17,14 +17,14 @@ override_dh_auto_install:
 	cp -r ingest.py generate-cut-list.py record-mixed-av.sh \
 		record-timestamp.sh \
 		lib/ tests/ \
-	  	$(CURDIR)/debian/voctomix-outcasts/usr/share/voctomix/clients/
-	ln -s /usr/share/voctomix/clients/ingest.py \
+	  	$(CURDIR)/debian/voctomix-outcasts/usr/share/voctomix/outcasts/
+	ln -s /usr/share/voctomix/outcasts/ingest.py \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/ingest
-	ln -s /usr/share/voctomix/clients/generate-cut-list.py \
+	ln -s /usr/share/voctomix/outcasts/generate-cut-list.py \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/generate-cut-list
-	ln -s /usr/share/voctomix/clients/record-mixed-av.sh \
+	ln -s /usr/share/voctomix/outcasts/record-mixed-av.sh \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-mixed-av
-	ln -s /usr/share/voctomix/clients/record-timestamp.sh \
+	ln -s /usr/share/voctomix/outcasts/record-timestamp.sh \
 		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-timestamp
 
 override_dh_installdocs:

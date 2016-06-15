@@ -7,8 +7,8 @@ Dependencies listed here:
 https://github.com/voc/voctomix#installation
 ```
 git clone https://github.com/voc/voctomix.git
-git clone https://github.com/CarlFK/vocto-outcasts.git
-cd vocto-outcasts
+git clone https://github.com/CarlFK/voctomix-outcasts.git
+cd voctomix-outcasts
 cd tests
 ./test1.sh
 ```
