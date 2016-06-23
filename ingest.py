@@ -32,14 +32,15 @@ import lib.connection as Connection
 def mk_video_src(args, videocaps):
     # make video soure part of pipeline
 
-    video_device = "device={}".format(args.video_dev) \
+    video_args={}
+
+    video_args['video_device'] = "device={}".format(args.video_dev) \
         if args.video_dev else ""
 
-    monitor = """tee name=t ! queue !
+    video_args['monitor'] = """tee name=t ! queue !
                     videoconvert ! fpsdisplaysink sync=false 
                     t. ! queue !""" \
         if args.monitor else ""
-
 
     if args.video_source == 'dv':
         video_src = """
@@ -92,6 +93,9 @@ def mk_video_src(args, videocaps):
                 # startx=0 starty=0 endx=1919 endy=1079 !
 
     elif args.video_source == 'blackmagichdmi':
+
+        video_args['mode'] = args.video_arg if args.video_arg else "17"
+
         video_src = """
             decklinkvideosrc mode=17 connection=2 !
                 {monitor}
@@ -101,16 +105,16 @@ def mk_video_src(args, videocaps):
             """
 
     elif args.video_source == 'test':
+        video_args['pattern'] = args.video_arg if args.video_arg else "ball"
+
         video_src = """
             videotestsrc name=videosrc 
-                pattern=ball 
+                pattern={pattern} 
                 foreground-color=0x00ff0000 background-color=0x00440000 !
                 {monitor}
             """
 
-    video_src = video_src.format(
-                    video_device=video_device,
-                    monitor=monitor)
+    video_src = video_src.format( **video_args )
 
     video_src += videocaps + "!\n"
 
@@ -260,6 +264,9 @@ def get_args():
 
     parser.add_argument( '--video-dev', action='store', 
             help="video device")
+
+    parser.add_argument( '--video-arg', action='store', 
+            help="misc video arg for gst whatever")
 
     parser.add_argument( '--audio-source', action='store', 
             choices=['dv', 'alsa', 'pulse', 'blackmagichdmi', 'test'], 
