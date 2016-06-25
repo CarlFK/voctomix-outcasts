@@ -3,6 +3,9 @@ import socket
 import json
 import sys
 from queue import Queue
+
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
 log = logging.getLogger('Connection')
