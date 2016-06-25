@@ -105,12 +105,18 @@ def mk_video_src(args, videocaps):
             """
 
     elif args.video_source == 'test':
+
         video_args['pattern'] = args.video_arg if args.video_arg else "ball"
+        video_args['hostname'] = socket.gethostname()
+        video_args['videocaps'] = videocaps
 
         video_src = """
             videotestsrc name=videosrc 
                 pattern={pattern} 
                 foreground-color=0x00ff0000 background-color=0x00440000 !
+                clockoverlay 
+                    text="Source:{hostname}\nCaps:{videocaps}\nStream time:" 
+                    halignment=left line-alignment=left !
                 {monitor}
             """
 
@@ -212,11 +218,13 @@ def run_pipeline(pipeline, args):
     senderPipeline.use_clock(clock)
     src = senderPipeline.get_by_name('src')
 
-    def on_eos(self, bus, message):
+    def on_eos(bus, message):
         print('Received EOS-Signal')
         sys.exit(1)
 
-    def on_error(self, bus, message):
+    def on_error(bus, message):
+        # TypeError: on_error() missing 1 required positional argument: 'message'
+
         print('Received Error-Signal')
         (error, debug) = message.parse_error()
         print('Error-Details: #%u: %s' % (error.code, debug))
