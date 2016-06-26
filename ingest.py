@@ -189,7 +189,8 @@ def mk_pipeline(args, server_caps):
     pipeline = video_src + "mux.\n" + audio_src + mux + client
 
     # remove blank lines to make it more human readable
-    pipeline = pipeline.replace("\n\n","\n")
+    while "\n\n" in pipeline:
+        pipeline = pipeline.replace("\n\n","\n")
 
     return pipeline
 
@@ -301,6 +302,9 @@ def get_args():
             default='10000',
             help="port of vocto core")
 
+    parser.add_argument('--debug', action='store_true',
+            help="debugging things, like dump a  gst-launch-1.0 command")
+
     args = parser.parse_args()
 
     return args
@@ -318,8 +322,20 @@ def main():
 
     pipeline = mk_pipeline(args, server_caps)
     print(pipeline)
-    run_pipeline(pipeline, args)
+    if args.debug:
+        gst_cmd = "gst-launch-1.0 {}".format(pipeline)
 
+        gst_cmd = gst_cmd.replace("!"," \! ")
+
+        # remove all the \n to make it easy to cut/paste into shell
+        gst_cmd = gst_cmd.replace("\n"," ")
+        while "  " in gst_cmd:
+            gst_cmd = gst_cmd.replace("  "," ")
+        print("-"*78)
+        print(gst_cmd)
+        print("-"*78)
+
+    run_pipeline(pipeline, args)
 
 
 if __name__ == '__main__':
