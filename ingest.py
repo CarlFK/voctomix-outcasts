@@ -97,7 +97,7 @@ def mk_video_src(args, videocaps):
         video_args['mode'] = args.video_arg if args.video_arg else "17"
 
         video_src = """
-            decklinkvideosrc mode=17 connection=2 !
+            decklinkvideosrc mode={mode} connection=2 !
                 {monitor}
 		videoconvert !
                 videorate !
