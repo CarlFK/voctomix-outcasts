@@ -92,25 +92,14 @@ def mk_video_src(args, videocaps):
             """
                 # startx=0 starty=0 endx=1919 endy=1079 !
 
-    elif args.video_source == 'blackmagichdmi':
+    elif args.video_source == 'blackmagic':
 
-        video_args['mode'] = args.video_arg if args.video_arg else "17"
-
-        video_src = """
-            decklinkvideosrc mode={mode} connection=2 !
-                {monitor}
-		videoconvert !
-                yadif !
-                videorate !
-                videoscale !
-            """
-
-    elif args.video_source == 'blackmagicsdi':
-
-        video_args['mode'] = args.video_arg if args.video_arg else "17"
+        mode, connection = args.video_arg.split(':')
+        video_args['mode'] = mode
+        video_args['connection'] = connection
 
         video_src = """
-            decklinkvideosrc mode={mode} connection=1 !
+            decklinkvideosrc mode={mode} connection{connection} !
                 {monitor}
 		videoconvert !
                 yadif !
@@ -119,10 +108,12 @@ def mk_video_src(args, videocaps):
             """
 
     elif args.video_source == 'png':
+
         file, start, stop = args.video_arg.split(':')
         video_args['file'] = file
         video_args['start'] = start
         video_args['stop'] = stop
+
         video_src = """
             multifilesrc
                 loop=1
@@ -179,12 +170,7 @@ def mk_audio_src(args, audiocaps):
                 alsasrc {audio_device} name=audiosrc !
                 """.format(audio_device=audio_device)
 
-    elif args.audio_source == 'blackmagichdmi':
-        audio_src = """
-            decklinkaudiosrc !
-            """
-
-    elif args.audio_source == 'blackmagicsdi':
+    elif args.audio_source == 'blackmagic':
         audio_src = """
             decklinkaudiosrc !
             """
@@ -300,8 +286,8 @@ def get_args():
 
     parser.add_argument( '--video-source', action='store', 
             choices=[
-                'dv', 'hdv', 'hdmi2usb', 'blackmagichdmi',
-                'blackmagicsdi', 'ximage', 'png', 'test'], 
+                'dv', 'hdv', 'hdmi2usb', 'blackmagic',
+                'ximage', 'png', 'test'], 
             default='test',
             help="Where to get video from")
 
@@ -312,8 +298,7 @@ def get_args():
             help="misc video arg for gst whatever")
 
     parser.add_argument( '--audio-source', action='store', 
-            choices=['dv', 'alsa', 'pulse', 'blackmagichdmi',
-                     'blackmagicsdi', 'test'], 
+            choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'], 
             default='test',
             help="Where to get audio from")
 
