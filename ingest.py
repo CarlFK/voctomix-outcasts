@@ -99,7 +99,7 @@ def mk_video_src(args, videocaps):
         video_args['connection'] = connection
 
         video_src = """
-            decklinkvideosrc mode={mode} connection{connection} !
+            decklinkvideosrc mode={mode} connection={connection} !
                 {monitor}
 		videoconvert !
                 yadif !
