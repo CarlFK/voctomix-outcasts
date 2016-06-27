@@ -100,6 +100,7 @@ def mk_video_src(args, videocaps):
             decklinkvideosrc mode={mode} connection=2 !
                 {monitor}
 		videoconvert !
+                yadif !
                 videorate !
                 videoscale !
             """
