@@ -120,7 +120,7 @@ def mk_video_src(args, videocaps):
                 location={file}
                 start-index={start}
                 stop-index={stop}
-                caps="image/png,framerate=25/1" !
+                caps="image/png !
             pngdec !
             videoconvert !
             """
