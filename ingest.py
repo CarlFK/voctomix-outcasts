@@ -118,6 +118,22 @@ def mk_video_src(args, videocaps):
                 videoscale !
             """
 
+    elif args.video_source == 'png':
+        file, start, stop = args.video_arg.split(':')
+        video_args['file'] = file
+        video_args['start'] = start
+        video_args['stop'] = stop
+        video_src = """
+            multifilesrc
+                loop=1
+                location={file}
+                start-index={start}
+                stop-index={stop}
+                caps="image/png,framerate=25/1" !
+            pngdec !
+            videoconvert !
+            """
+
     elif args.video_source == 'test':
 
         video_args['pattern'] = args.video_arg if args.video_arg else "ball"
@@ -285,7 +301,7 @@ def get_args():
     parser.add_argument( '--video-source', action='store', 
             choices=[
                 'dv', 'hdv', 'hdmi2usb', 'blackmagichdmi',
-                'blackmagicsdi', 'ximage', 'test'], 
+                'blackmagicsdi', 'ximage', 'png', 'test'], 
             default='test',
             help="Where to get video from")
 
