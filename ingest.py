@@ -105,6 +105,19 @@ def mk_video_src(args, videocaps):
                 videoscale !
             """
 
+    elif args.video_source == 'blackmagicsdi':
+
+        video_args['mode'] = args.video_arg if args.video_arg else "17"
+
+        video_src = """
+            decklinkvideosrc mode={mode} connection=1 !
+                {monitor}
+		videoconvert !
+                yadif !
+                videorate !
+                videoscale !
+            """
+
     elif args.video_source == 'test':
 
         video_args['pattern'] = args.video_arg if args.video_arg else "ball"
@@ -151,6 +164,11 @@ def mk_audio_src(args, audiocaps):
                 """.format(audio_device=audio_device)
 
     elif args.audio_source == 'blackmagichdmi':
+        audio_src = """
+            decklinkaudiosrc !
+            """
+
+    elif args.audio_source == 'blackmagicsdi':
         audio_src = """
             decklinkaudiosrc !
             """
@@ -266,9 +284,8 @@ def get_args():
 
     parser.add_argument( '--video-source', action='store', 
             choices=[
-                'dv', 'hdv', 'hdmi2usb', 'blackmagichdmi', 
-                'ximage',
-                'test', ], 
+                'dv', 'hdv', 'hdmi2usb', 'blackmagichdmi',
+                'blackmagicsdi', 'ximage', 'test'], 
             default='test',
             help="Where to get video from")
 
@@ -279,7 +296,8 @@ def get_args():
             help="misc video arg for gst whatever")
 
     parser.add_argument( '--audio-source', action='store', 
-            choices=['dv', 'alsa', 'pulse', 'blackmagichdmi', 'test'], 
+            choices=['dv', 'alsa', 'pulse', 'blackmagichdmi',
+                     'blackmagicsdi', 'test'], 
             default='test',
             help="Where to get audio from")
 
