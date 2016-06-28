@@ -20,6 +20,7 @@ import socket
 import sys
 
 gi.require_version('Gst', '1.0')
+gi.require_version('GstNet', '1.0')
 from gi.repository import Gst, GstNet, GObject
 
 # init GObject & Co. before importing local classes
@@ -109,21 +110,34 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'png':
 
-        file, start, stop = args.video_arg.split(':')
-        video_args['file'] = file
-        video_args['start'] = start
-        video_args['stop'] = stop
+        if ":" in args.video_arg:
+            file, start, stop = args.video_arg.split(':')
+            video_args['file'] = file
+            video_args['start'] = start
+            video_args['stop'] = stop
 
-        video_src = """
-            multifilesrc
-                loop=1
-                location={file}
-                start-index={start}
-                stop-index={stop}
-                caps="image/png !
-            pngdec !
-            videoconvert !
-            """
+            video_src = """
+                multifilesrc
+                    loop=1
+                    location={file}
+                    start-index={start}
+                    stop-index={stop}
+                    caps="image/png" !
+                pngdec !
+                {monitor}
+                videoconvert !
+                """
+        else:
+            video_args['attrs'] = args.video_arg
+            video_src = """
+                multifilesrc
+                    {attrs}
+                    loop=1
+                    caps="image/png" !
+                pngdec !
+                videoconvert !
+                """
+             
 
     elif args.video_source == 'test':
 
@@ -295,6 +309,7 @@ def get_args():
             help="video device")
 
     parser.add_argument( '--video-arg', action='store', 
+            default='',
             help="misc video arg for gst whatever")
 
     parser.add_argument( '--audio-source', action='store', 
@@ -342,9 +357,12 @@ def main():
 
     pipeline = mk_pipeline(args, server_caps)
     print(pipeline)
+
     if args.debug:
         gst_cmd = "gst-launch-1.0 {}".format(pipeline)
 
+        # escape the ! because  
+        # asl2: ! is interpreted as a command history metacharacter
         gst_cmd = gst_cmd.replace("!"," \! ")
 
         # remove all the \n to make it easy to cut/paste into shell
