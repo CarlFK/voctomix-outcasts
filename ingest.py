@@ -135,9 +135,10 @@ def mk_video_src(args, videocaps):
                     loop=1
                     caps="image/png" !
                 pngdec !
+                videoscale !
                 videoconvert !
                 """
-             
+            
 
     elif args.video_source == 'test':
 
