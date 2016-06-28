@@ -33,19 +33,16 @@ import lib.connection as Connection
 def mk_video_src(args, videocaps):
     # make video soure part of pipeline
 
-    video_args={}
+    d={ 'attribs': args.video_attribs }
 
-    video_args['video_device'] = "device={}".format(args.video_dev) \
-        if args.video_dev else ""
-
-    video_args['monitor'] = """tee name=t ! queue !
+    d['monitor'] = """tee name=t ! queue !
                     videoconvert ! fpsdisplaysink sync=false 
                     t. ! queue !""" \
         if args.monitor else ""
 
     if args.video_source == 'dv':
         video_src = """
-            dv1394src name=videosrc {video_device}!
+            dv1394src name=videosrc {attribs} !
 		dvdemux name=demux !
 		queue !
 		dvdec !
@@ -58,7 +55,7 @@ def mk_video_src(args, videocaps):
     
     elif args.video_source == 'hdv':
         video_src = """
-            hdv1394src {video_device} do-timestamp=true name=videosrc !
+            hdv1394src {attribs} do-timestamp=true name=videosrc !
 		tsdemux name=demux!
 		queue !
 		decodebin !
@@ -73,7 +70,7 @@ def mk_video_src(args, videocaps):
         # https://hdmi2usb.tv
         # Note: this code works with 720p
         video_src = """
-            v4l2src {video_device} name=videosrc !
+            v4l2src {attribs} name=videosrc !
                 queue !
 		image/jpeg,width=1280,height=720 !
                 jpegdec !
@@ -84,7 +81,7 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'ximage':
         video_src = """
-            ximagesrc name=videosrc 
+            ximagesrc {attribs} name=videosrc 
                    use-damage=false !
                 {monitor}
 		videoconvert !
@@ -94,13 +91,8 @@ def mk_video_src(args, videocaps):
                 # startx=0 starty=0 endx=1919 endy=1079 !
 
     elif args.video_source == 'blackmagic':
-
-        mode, connection = args.video_arg.split(':')
-        video_args['mode'] = mode
-        video_args['connection'] = connection
-
         video_src = """
-            decklinkvideosrc mode={mode} connection={connection} !
+            decklinkvideosrc {attribs} !
                 {monitor}
 		videoconvert !
                 yadif !
@@ -110,53 +102,30 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'png':
 
-        if ":" in args.video_arg:
-            file, start, stop = args.video_arg.split(':')
-            video_args['file'] = file
-            video_args['start'] = start
-            video_args['stop'] = stop
-
-            video_src = """
-                multifilesrc
-                    loop=1
-                    location={file}
-                    start-index={start}
-                    stop-index={stop}
-                    caps="image/png" !
-                pngdec !
-                {monitor}
-                videoconvert !
-                """
-        else:
-            video_args['attrs'] = args.video_arg
-            video_src = """
-                multifilesrc
-                    {attrs}
-                    loop=1
-                    caps="image/png" !
-                pngdec !
-                videoscale !
-                videoconvert !
-                """
-            
+        video_src = """
+            multifilesrc {attribs}
+                loop=1
+                caps="image/png" !
+            pngdec !
+            videoscale !
+            videoconvert !
+            """
 
     elif args.video_source == 'test':
 
-        video_args['pattern'] = args.video_arg if args.video_arg else "ball"
-        video_args['hostname'] = socket.gethostname()
-        video_args['videocaps'] = videocaps
+        d['hostname'] = socket.gethostname()
+        d['videocaps'] = videocaps
 
         video_src = """
             videotestsrc name=videosrc 
-                pattern={pattern} 
-                foreground-color=0x00ff0000 background-color=0x00440000 !
+                {attribs} !
                 clockoverlay 
-                    text="Source:{hostname}\nCaps:{videocaps}\nStream time:" 
+                text="Source:{hostname}\nCaps:{videocaps}\n" 
                     halignment=left line-alignment=left !
                 {monitor}
             """
 
-    video_src = video_src.format( **video_args )
+    video_src = video_src.format( **d )
 
     video_src += videocaps + "!\n"
 
@@ -164,8 +133,7 @@ def mk_video_src(args, videocaps):
 
 def mk_audio_src(args, audiocaps):
 
-    audio_device = "device={}".format(args.audio_dev) \
-        if args.audio_dev else ""
+    d={ 'attribs': args.audio_attribs }
 
     if args.audio_source in [ 'dv', 'hdv' ]:
         # this only works if video is from DV also.
@@ -177,23 +145,25 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'pulse':
         audio_src = """
-                pulsesrc {audio_device} name=audiosrc !
-                """.format(audio_device=audio_device)
+                pulsesrc {attribs} name=audiosrc !
+                """
 
     elif args.audio_source == 'alsa':
         audio_src = """
-                alsasrc {audio_device} name=audiosrc !
-                """.format(audio_device=audio_device)
+                alsasrc {attribs} name=audiosrc !
+                """
 
     elif args.audio_source == 'blackmagic':
         audio_src = """
-            decklinkaudiosrc !
+            decklinkaudiosrc {attribs} !
             """
 
     elif args.audio_source == 'test':
         audio_src = """
-            audiotestsrc name=audiosrc freq=330 !
+            audiotestsrc {attribs} name=audiosrc freq=330 !
             """
+    audio_src = audio_src.format(**d)
+        
     audio_src += audiocaps + "!\n"
 
     return audio_src
@@ -306,26 +276,18 @@ def get_args():
             default='test',
             help="Where to get video from")
 
-    parser.add_argument( '--video-dev', action='store', 
-            help="video device")
-
-    parser.add_argument( '--video-arg', action='store', 
+    parser.add_argument( '--video-attribs', action='store', 
             default='',
-            help="misc video arg for gst whatever")
+            help="misc video attributes for gst")
 
     parser.add_argument( '--audio-source', action='store', 
             choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'], 
             default='test',
             help="Where to get audio from")
 
-    parser.add_argument( '--audio-dev', action='store', 
-            default='hw:CARD=CODEC',
-            help="for alsa/pulse, audio device")
-            # maybe hw:1,0
-
-    parser.add_argument( '--audio-delay', action='store', 
-            default='10',
-            help="ms to delay audio")
+    parser.add_argument( '--audio-attribs', action='store', 
+            default='',
+            help="misc audio attributes for gst")
 
     parser.add_argument('-m', '--monitor', action='store_true',
             help="fps display sink")
