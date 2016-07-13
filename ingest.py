@@ -76,6 +76,7 @@ def mk_video_src(args, videocaps):
                 jpegdec !
                 {monitor}
                 videoconvert !
+                videoscale !
                 videorate !
             """
 
