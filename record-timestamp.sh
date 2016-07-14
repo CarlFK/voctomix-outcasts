@@ -18,8 +18,4 @@ ffmpeg \
          -strftime 1 "$dest_dir/%Y-%m-%d/%H_%M_%S.ts"
 	
 
-#echo "ERROR: Recording stopped!  Attempting to restart..."
-#echo -en "\007"
-#sleep 1
-#echo -en "\007"
 
