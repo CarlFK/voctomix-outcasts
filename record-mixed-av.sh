@@ -1,6 +1,10 @@
 #!/bin/sh
-gst-launch-1.0 \
-	tcpclientsrc host=localhost port=11000 !\
+
+
+dest_dir=$1/$(date +%Y-%m-%d)
+
+mkdir -p $dest_dir
+
 	matroskademux name=demux \
 	\
 	demux. !\
@@ -18,4 +22,5 @@ gst-launch-1.0 \
 		mux. \
 	\
 	mpegtsmux name=mux !\
-		filesink location=foo.ts
+		filesink location="$dest_dir/$(date +%H_%M_%S).gs.ts"
+
