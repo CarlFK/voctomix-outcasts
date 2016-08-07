@@ -102,26 +102,25 @@ def mk_video_src(args, videocaps):
                 # yadif !
 
     elif args.video_source == 'png':
-
         video_src = """
             multifilesrc {attribs}
                 loop=1
                 caps="image/png" !
             pngdec !
             videoscale !
+                {monitor}
             videoconvert !
             """
 
     elif args.video_source == 'test':
 
+        # things to render as text ontop of test video
         d['hostname'] = socket.gethostname()
         d['videocaps'] = videocaps
 
         video_src = """
-            videotestsrc name=videosrc 
-                {attribs} !
-                clockoverlay 
-                text="Source:{hostname}\nCaps:{videocaps}\n" 
+            videotestsrc name=videosrc {attribs} !
+                clockoverlay text="Source:{hostname}\nCaps:{videocaps}" 
                     halignment=left line-alignment=left !
                 {monitor}
             """
@@ -169,59 +168,86 @@ def mk_audio_src(args, audiocaps):
 
     return audio_src
 
-def mk_mux(args):
+def mk_client(core_ip,port):
 
-    mux = """
-     mux.
-            matroskamux name=mux !
-        """
-    return mux
-
-def mk_client(args):
-    core_ip = socket.gethostbyname(args.host)
-    client = """ 
-                 tcpclientsink host={host} port={port}
-                 """.format(host=core_ip, port=args.port)
+    client = "tcpclientsink host={host} port={port}".format(
+            host=core_ip, port=port)
 
     return client
 
 
-def mk_pipeline(args, server_caps):
+def mk_pipeline(args, server_caps, core_ip):
 
     video_src = mk_video_src(args, server_caps['videocaps'])
     audio_src = mk_audio_src(args, server_caps['audiocaps'])
-    mux = mk_mux(args)
-    client = mk_client(args)
+    
+    client = mk_client(core_ip,args.port)
 
-    pipeline = video_src + "mux.\n" + audio_src + mux + client
+    pipeline = """
+    {video_src}
+     mux.
+    {audio_src}
+     mux.
+            matroskamux name=mux !
+    {client}
+    """.format( video_src=video_src, audio_src=audio_src, client=client )
 
     # remove blank lines to make it more human readable
     while "\n\n" in pipeline:
         pipeline = pipeline.replace("\n\n","\n")
 
+    print(pipeline)
+
+    if args.debug:
+        gst_cmd = "gst-launch-1.0 {}".format(pipeline)
+
+        # escape the ! because  
+        # asl2: ! is interpreted as a command history metacharacter
+        gst_cmd = gst_cmd.replace("!"," \! ")
+
+        # remove all the \n to make it easy to cut/paste into shell
+        gst_cmd = gst_cmd.replace("\n"," ")
+        while "  " in gst_cmd:
+            gst_cmd = gst_cmd.replace("  "," ")
+        print("-"*78)
+        print(gst_cmd)
+        print("-"*78)
+
     return pipeline
 
-def get_server_caps():
+def get_server_caps(core_ip):
 
+    # establish a synchronus connection to server
+    Connection.establish(core_ip) 
 
     # fetch config from server
     server_config = Connection.fetchServerConfig()
-    server_caps = {'videocaps': server_config['mix']['videocaps'],
-            'audiocaps': server_config['mix']['audiocaps']}
+
+    # Pull out the configs relevant to this client
+    server_caps = {
+        'videocaps': server_config['mix']['videocaps'],
+        'audiocaps': server_config['mix']['audiocaps']
+        }
 
     return server_caps
 
-def run_pipeline(pipeline, args):
+def get_clock(core_ip, core_clock_port=9998):
 
-    core_ip = socket.gethostbyname(args.host)
+    clock = GstNet.NetClientClock.new( 'voctocore', 
+            core_ip, core_clock_port, 0)
 
-    clock = GstNet.NetClientClock.new('voctocore', core_ip, 9998, 0)
-    print('obtained NetClientClock from host', clock)
+    print('obtained NetClientClock from host: {ip}:{port}'.format(
+        ip=core_ip, port=core_clock_port) )
 
     print('waiting for NetClientClock to sync…')
     clock.wait_for_sync(Gst.CLOCK_TIME_NONE)
 
-    print('starting pipeline')
+    return clock
+
+
+def run_pipeline(pipeline, clock):
+
+    print('starting pipeline...')
     senderPipeline = Gst.parse_launch(pipeline)
     senderPipeline.use_clock(clock)
     src = senderPipeline.get_by_name('src')
@@ -231,12 +257,10 @@ def run_pipeline(pipeline, args):
         sys.exit(1)
 
     def on_error(bus, message):
-        # TypeError: on_error() missing 1 required positional argument: 'message'
-
         print('Received Error-Signal')
         (error, debug) = message.parse_error()
         print('Error-Details: #%u: %s' % (error.code, debug))
-        sys.exit(1)
+        sys.exit(2)
 
 
     # Binding End-of-Stream-Signal on Source-Pipeline
@@ -244,7 +268,7 @@ def run_pipeline(pipeline, args):
     senderPipeline.bus.connect("message::eos", on_eos)
     senderPipeline.bus.connect("message::error", on_error)
 
-    print("playing")
+    print("playing...")
     senderPipeline.set_state(Gst.State.PLAYING)
  
     mainloop = GObject.MainLoop()
@@ -312,32 +336,14 @@ def get_args():
 def main():
     
     args = get_args()
-
     core_ip = socket.gethostbyname(args.host)
-    # establish a synchronus connection to server
-    Connection.establish(core_ip) 
 
-    server_caps = get_server_caps()
+    server_caps = get_server_caps(core_ip)
+    pipeline = mk_pipeline(args, server_caps, core_ip )
 
-    pipeline = mk_pipeline(args, server_caps)
-    print(pipeline)
+    clock = get_clock(core_ip)
 
-    if args.debug:
-        gst_cmd = "gst-launch-1.0 {}".format(pipeline)
-
-        # escape the ! because  
-        # asl2: ! is interpreted as a command history metacharacter
-        gst_cmd = gst_cmd.replace("!"," \! ")
-
-        # remove all the \n to make it easy to cut/paste into shell
-        gst_cmd = gst_cmd.replace("\n"," ")
-        while "  " in gst_cmd:
-            gst_cmd = gst_cmd.replace("  "," ")
-        print("-"*78)
-        print(gst_cmd)
-        print("-"*78)
-
-    run_pipeline(pipeline, args)
+    run_pipeline(pipeline, clock)
 
 
 if __name__ == '__main__':
