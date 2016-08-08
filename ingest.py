@@ -31,7 +31,7 @@ import lib.connection as Connection
 
 
 def mk_video_src(args, videocaps):
-    # make video soure part of pipeline
+    # make video source part of pipeline
 
     d={ 'attribs': args.video_attribs }
 
@@ -134,7 +134,9 @@ def mk_video_src(args, videocaps):
 
 def mk_audio_src(args, audiocaps):
 
-    d={ 'attribs': args.audio_attribs }
+    BASE_AUDIO_ATTRIBS='provide-clock=false slave-method=resample'
+
+    d={ 'attribs': '{} {}'.format(BASE_AUDIO_ATTRIBS, args.audio_attribs) }
 
     if args.audio_source in [ 'dv', 'hdv' ]:
         # this only works if video is from DV also.
@@ -203,7 +205,6 @@ def mk_pipeline(args, server_caps):
 
 def get_server_caps():
 
-
     # fetch config from server
     server_config = Connection.fetchServerConfig()
     server_caps = {'videocaps': server_config['mix']['videocaps'],
@@ -238,6 +239,18 @@ def run_pipeline(pipeline, args):
         print('Error-Details: #%u: %s' % (error.code, debug))
         sys.exit(1)
 
+    # Delay video/audio if required
+    video_delay = int(args.video_delay) * 100000 # in ns
+    audio_delay = int(args.audio_delay) * 100000 
+
+    if video_delay > 0:
+        print('Adjusting video sync: [{} milliseconds]'.format(args.video_delay))
+        videosrc = senderPipeline.get_by_name('videosrc')
+        videosrc.get_static_pad('src').set_offset(video_delay)
+    if audio_delay > 0:
+        print('Adjusting audio sync: [{} milliseconds]'.format(args.audio_delay))
+        audiosrc = senderPipeline.get_by_name('audiosrc')
+        audiosrc.get_static_pad('src').set_offset(audio_delay)
 
     # Binding End-of-Stream-Signal on Source-Pipeline
     senderPipeline.bus.add_signal_watch()
@@ -270,34 +283,42 @@ def get_args():
     parser.add_argument('-v', '--verbose', action='count', default=0,
             help="Also print INFO and DEBUG messages.")
 
-    parser.add_argument( '--video-source', action='store', 
+    parser.add_argument('--video-source', action='store', 
             choices=[
                 'dv', 'hdv', 'hdmi2usb', 'blackmagic',
                 'ximage', 'png', 'test'], 
             default='test',
             help="Where to get video from")
 
-    parser.add_argument( '--video-attribs', action='store', 
+    parser.add_argument('--video-attribs', action='store', 
             default='',
             help="misc video attributes for gst")
 
-    parser.add_argument( '--audio-source', action='store', 
+    parser.add_argument('--video-delay', action='store',
+	    default='0',
+	    help="delay video by this many milliseconds")
+
+    parser.add_argument('--audio-source', action='store', 
             choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'], 
             default='test',
             help="Where to get audio from")
 
-    parser.add_argument( '--audio-attribs', action='store', 
+    parser.add_argument('--audio-attribs', action='store', 
             default='',
             help="misc audio attributes for gst")
+
+    parser.add_argument('--audio-delay', action='store',
+	    default='0',
+            help="delay audio by this many milliseconds")
 
     parser.add_argument('-m', '--monitor', action='store_true',
             help="fps display sink")
 
-    parser.add_argument( '--host', action='store', 
+    parser.add_argument('--host', action='store', 
             default='localhost',
             help="hostname of vocto core")
 
-    parser.add_argument( '--port', action='store', 
+    parser.add_argument('--port', action='store', 
             default='10000',
             help="port of vocto core")
 
