@@ -33,7 +33,7 @@ import lib.connection as Connection
 def mk_video_src(args, videocaps):
     # make video source part of pipeline
 
-    d={ 'attribs': args.video_attribs }
+    d = { 'attribs': args.video_attribs }
 
     d['monitor'] = """tee name=t ! queue !
                     videoconvert ! fpsdisplaysink sync=false 
@@ -134,9 +134,10 @@ def mk_video_src(args, videocaps):
 
 def mk_audio_src(args, audiocaps):
 
-    BASE_AUDIO_ATTRIBS='provide-clock=false slave-method=resample'
-
-    d={ 'attribs': '{} {}'.format(BASE_AUDIO_ATTRIBS, args.audio_attribs) }
+    d = { 
+        'attribs': args.audio_attribs,
+        'base_audio_attribs': 'provide-clock=false slave-method=re-timestamp'
+    }
 
     if args.audio_source in [ 'dv', 'hdv' ]:
         # this only works if video is from DV also.
@@ -148,12 +149,12 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'pulse':
         audio_src = """
-                pulsesrc {attribs} name=audiosrc !
+                pulsesrc {attribs} {base_audio_attribs} name=audiosrc !
                 """
 
     elif args.audio_source == 'alsa':
         audio_src = """
-                alsasrc {attribs} name=audiosrc !
+                alsasrc {attribs} {base_audio_attribs} name=audiosrc !
                 """
 
     elif args.audio_source == 'blackmagic':
@@ -333,7 +334,7 @@ def get_args():
 def main():
     
     args = get_args()
-
+	
     core_ip = socket.gethostbyname(args.host)
     # establish a synchronus connection to server
     Connection.establish(core_ip) 
