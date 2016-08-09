@@ -149,12 +149,12 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'pulse':
         audio_src = """
-                pulsesrc {attribs} {base_audio_attribs} name=audiosrc !
+                pulsesrc {attribs} {base_audio_attribs} name=audiosrc ! queue ! audiorate !
                 """
 
     elif args.audio_source == 'alsa':
         audio_src = """
-                alsasrc {attribs} {base_audio_attribs} name=audiosrc !
+                alsasrc {attribs} {base_audio_attribs} name=audiosrc ! queue ! audiorate !
                 """
 
     elif args.audio_source == 'blackmagic':
