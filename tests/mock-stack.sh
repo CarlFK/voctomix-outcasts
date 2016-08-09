@@ -9,7 +9,7 @@ gst-launch-1.0 \
      mux. \
             audiotestsrc  name=audiosrc ! \
      mux. \
-            matroskamux name=mux ! \
+            matroskamux streamable=true name=mux ! \
     tcpclientsink host=127.0.0.1 port=4953 &
 
 gst-launch-1.0 \
@@ -29,4 +29,6 @@ gst-launch-1.0 \
 		mux. \
 	mpegtsmux name=mux !\
 		filesink location="/tmp/test.ts"
+
+ps
 
