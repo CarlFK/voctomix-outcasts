@@ -36,34 +36,34 @@ def mk_video_src(args, videocaps):
     d = { 'attribs': args.video_attribs }
 
     d['monitor'] = """tee name=t ! queue !
-                    videoconvert ! fpsdisplaysink sync=false 
+                    videoconvert ! fpsdisplaysink sync=false
                     t. ! queue !""" \
         if args.monitor else ""
 
     if args.video_source == 'dv':
         video_src = """
             dv1394src name=videosrc {attribs} !
-		dvdemux name=demux !
-		queue !
-		dvdec !
+        dvdemux name=demux !
+        queue !
+        dvdec !
                 {monitor}
-		deinterlace mode=1 !
-		videoconvert !
-                videorate !
-                videoscale !
+        deinterlace mode=1 !
+        videoconvert !
+        videorate !
+        videoscale !
             """
-    
+
     elif args.video_source == 'hdv':
         video_src = """
             hdv1394src {attribs} do-timestamp=true name=videosrc !
-		tsdemux name=demux!
-		queue !
-		decodebin !
+        tsdemux name=demux!
+        queue !
+        decodebin !
                 {monitor}
-		deinterlace mode=1 !
-		videorate !
-                videoscale !
-		videoconvert !
+        deinterlace mode=1 !
+        videorate !
+        videoscale !
+        videoconvert !
             """
 
     elif args.video_source == 'hdmi2usb':
@@ -72,7 +72,7 @@ def mk_video_src(args, videocaps):
         video_src = """
             v4l2src {attribs} name=videosrc !
                 queue !
-		image/jpeg,width=1280,height=720 !
+        image/jpeg,width=1280,height=720 !
                 jpegdec !
                 {monitor}
                 videoconvert !
@@ -82,10 +82,10 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'ximage':
         video_src = """
-            ximagesrc {attribs} name=videosrc 
+            ximagesrc {attribs} name=videosrc
                    use-damage=false !
                 {monitor}
-		videoconvert !
+        videoconvert !
                 videorate !
                 videoscale !
             """
@@ -95,7 +95,7 @@ def mk_video_src(args, videocaps):
         video_src = """
             decklinkvideosrc {attribs} !
                 {monitor}
-		videoconvert !
+        videoconvert !
                 videorate !
                 videoscale !
             """
@@ -118,10 +118,10 @@ def mk_video_src(args, videocaps):
         d['videocaps'] = videocaps
 
         video_src = """
-            videotestsrc name=videosrc 
+            videotestsrc name=videosrc
                 {attribs} !
-                clockoverlay 
-                text="Source:{hostname}\nCaps:{videocaps}\n" 
+                clockoverlay
+                text="Source:{hostname}\nCaps:{videocaps}\n"
                     halignment=left line-alignment=left !
                 {monitor}
             """
@@ -134,7 +134,7 @@ def mk_video_src(args, videocaps):
 
 def mk_audio_src(args, audiocaps):
 
-    d = { 
+    d = {
         'attribs': args.audio_attribs,
         'base_audio_attribs': 'provide-clock=false slave-method=re-timestamp'
     }
@@ -167,7 +167,7 @@ def mk_audio_src(args, audiocaps):
             audiotestsrc {attribs} name=audiosrc freq=330 !
             """
     audio_src = audio_src.format(**d)
-        
+
     audio_src += audiocaps + "!\n"
 
     return audio_src
@@ -182,7 +182,7 @@ def mk_mux(args):
 
 def mk_client(args):
     core_ip = socket.gethostbyname(args.host)
-    client = """ 
+    client = """
                  tcpclientsink host={host} port={port}
                  """.format(host=core_ip, port=args.port)
 
@@ -242,7 +242,7 @@ def run_pipeline(pipeline, args):
 
     # Delay video/audio if required
     video_delay = int(args.video_delay) * 100000 # in ns
-    audio_delay = int(args.audio_delay) * 100000 
+    audio_delay = int(args.audio_delay) * 100000
 
     if video_delay > 0:
         print('Adjusting video sync: [{} milliseconds]'.format(args.video_delay))
@@ -260,7 +260,7 @@ def run_pipeline(pipeline, args):
 
     print("playing")
     senderPipeline.set_state(Gst.State.PLAYING)
- 
+
     mainloop = GObject.MainLoop()
     try:
         mainloop.run()
@@ -280,46 +280,46 @@ def get_args():
             Gst caps are retrieved from the server.
             Run without parameters: send test av to localhost:10000
             ''')
-    
+
     parser.add_argument('-v', '--verbose', action='count', default=0,
             help="Also print INFO and DEBUG messages.")
 
-    parser.add_argument('--video-source', action='store', 
+    parser.add_argument('--video-source', action='store',
             choices=[
                 'dv', 'hdv', 'hdmi2usb', 'blackmagic',
-                'ximage', 'png', 'test'], 
+                'ximage', 'png', 'test'],
             default='test',
             help="Where to get video from")
 
-    parser.add_argument('--video-attribs', action='store', 
+    parser.add_argument('--video-attribs', action='store',
             default='',
             help="misc video attributes for gst")
 
     parser.add_argument('--video-delay', action='store',
-	    default='0',
-	    help="delay video by this many milliseconds")
+        default='0',
+        help="delay video by this many milliseconds")
 
-    parser.add_argument('--audio-source', action='store', 
-            choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'], 
+    parser.add_argument('--audio-source', action='store',
+            choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'],
             default='test',
             help="Where to get audio from")
 
-    parser.add_argument('--audio-attribs', action='store', 
+    parser.add_argument('--audio-attribs', action='store',
             default='',
             help="misc audio attributes for gst")
 
     parser.add_argument('--audio-delay', action='store',
-	    default='0',
+            default='0',
             help="delay audio by this many milliseconds")
 
     parser.add_argument('-m', '--monitor', action='store_true',
             help="fps display sink")
 
-    parser.add_argument('--host', action='store', 
+    parser.add_argument('--host', action='store',
             default='localhost',
             help="hostname of vocto core")
 
-    parser.add_argument('--port', action='store', 
+    parser.add_argument('--port', action='store',
             default='10000',
             help="port of vocto core")
 
@@ -330,14 +330,14 @@ def get_args():
 
     return args
 
-    
+
 def main():
-    
+
     args = get_args()
-	
+
     core_ip = socket.gethostbyname(args.host)
     # establish a synchronus connection to server
-    Connection.establish(core_ip) 
+    Connection.establish(core_ip)
 
     server_caps = get_server_caps()
 
@@ -347,7 +347,7 @@ def main():
     if args.debug:
         gst_cmd = "gst-launch-1.0 {}".format(pipeline)
 
-        # escape the ! because  
+        # escape the ! because
         # asl2: ! is interpreted as a command history metacharacter
         gst_cmd = gst_cmd.replace("!"," \! ")
 
