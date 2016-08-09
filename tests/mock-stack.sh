@@ -1,18 +1,11 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 
 # core server
 gst-launch-1.0 \
     tcpserversrc host=127.0.0.1 port=4953 ! \
-    tcpserversink host=127.0.0.1 port=4954  &
-
-# test source client
-gst-launch-1.0 \
-            videotestsrc name=videosrc ! \
-     mux. \
-            audiotestsrc  name=audiosrc ! \
-     mux. \
-            matroskamux streamable=true name=mux ! \
-    tcpclientsink host=127.0.0.1 port=4953 &
+    tcpserversink host=127.0.0.1 port=4954  \
+& srv=$!
+sleep 1
 
 # file sink client
 gst-launch-1.0 \
@@ -31,7 +24,17 @@ gst-launch-1.0 \
 		queue !\
 		mux. \
 	mpegtsmux name=mux !\
-		filesink location="/tmp/test.ts"
+		filesink location="/tmp/test.ts" \
+&
 
-ps
+# test source client
+gst-launch-1.0 \
+            videotestsrc name=videosrc ! \
+     mux. \
+            audiotestsrc  name=audiosrc ! \
+     mux. \
+            matroskamux streamable=true name=mux ! \
+    tcpclientsink host=127.0.0.1 port=4953
+
+kill $srv
 
