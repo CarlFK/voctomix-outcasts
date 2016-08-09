@@ -1,9 +1,11 @@
 #!/bin/bash -ex
 
+# core server
 gst-launch-1.0 \
     tcpserversrc host=127.0.0.1 port=4953 ! \
     tcpserversink host=127.0.0.1 port=4954  &
 
+# test source client
 gst-launch-1.0 \
             videotestsrc name=videosrc ! \
      mux. \
@@ -12,6 +14,7 @@ gst-launch-1.0 \
             matroskamux streamable=true name=mux ! \
     tcpclientsink host=127.0.0.1 port=4953 &
 
+# file sink client
 gst-launch-1.0 \
     tcpclientsrc host=127.0.0.1 port=4954 !\
 	matroskademux name=demux \
