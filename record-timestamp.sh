@@ -5,7 +5,7 @@
 dest_dir=$1
 segment_time=1800
 
-mkdir -p $dest_dir/$(date +%Y-%m-%d)
+mkdir -p $dest_dir/$HOSTNAME/$(date +%Y-%m-%d)
 
 ffmpeg \
     -i tcp://127.0.0.1:11000 \

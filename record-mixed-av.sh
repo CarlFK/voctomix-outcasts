@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-dest_dir=$1/$(date +%Y-%m-%d)
+dest_dir=$1/$HOSTNAME/$(date +%Y-%m-%d)
 
 mkdir -p $dest_dir
 
