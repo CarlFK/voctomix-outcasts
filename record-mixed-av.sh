@@ -25,5 +25,5 @@ gst-launch-1.0 \
         mux. \
     \
     mpegtsmux name=mux !\
-        filesink location="$dest_dir/$(date +%H_%M_%S).gs.ts"
+        filesink location="$dest_dir/$HOSTNAME/$(date +%H_%M_%S).gs.ts"
 

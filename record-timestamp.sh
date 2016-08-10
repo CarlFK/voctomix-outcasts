@@ -15,6 +15,6 @@ ffmpeg \
         -flags +global_header -flags +ilme+ildct \
         -f segment -segment_time $segment_time \
          -segment_format mpegts \
-         -strftime 1 "$dest_dir/%Y-%m-%d/%H_%M_%S.ts"
+         -strftime 1 "$dest_dir/$HOSTNAME/%Y-%m-%d/%H_%M_%S.ts"
 
 
