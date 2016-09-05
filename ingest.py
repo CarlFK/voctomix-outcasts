@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-
-# ingest.py
 """
-Source client for Voctomix.
+ingest.py: source client for Voctomix.
+
+Ryan Verner <ryan@nextdayvideo.com.au>
+Carl Karsten <carl@nextdayvideo.com>
+
 Features:
     Retrieves audio and video-caps config from core.
     Uses core's clock.
-    Mix and match audio and video sources muxed into one streem.
+    Mix and match audio and video sources muxed into one stream.
     Can display video locally, including frame count and fps.
     Defaults to test audio and video sent to local core.
-
 """
 
 import argparse
@@ -43,8 +44,8 @@ def mk_video_src(args, videocaps):
     if args.video_source == 'dv':
         video_src = """
             dv1394src name=videosrc {attribs} !
-        dvdemux name=demux !
-        queue !
+        dvdemux !
+        queue max-size-time=4000000000 !
         dvdec !
                 {monitor}
         deinterlace mode=1 !
@@ -55,9 +56,9 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'hdv':
         video_src = """
-            hdv1394src {attribs} do-timestamp=true name=videosrc !
-        tsdemux name=demux!
-        queue !
+            hdv1394src {attribs} name=videosrc !
+        tsdemux !
+        queue max-size-time=4000000000 !
         decodebin !
                 {monitor}
         deinterlace mode=1 !
@@ -71,7 +72,7 @@ def mk_video_src(args, videocaps):
         # Note: this code works with 720p
         video_src = """
             v4l2src {attribs} name=videosrc !
-                queue !
+                queue max-size-time=4000000000 !
         image/jpeg,width=1280,height=720 !
                 jpegdec !
                 {monitor}
@@ -105,10 +106,11 @@ def mk_video_src(args, videocaps):
 
         video_src = """
             multifilesrc {attribs}
-                loop=1
+                loop=0
                 caps="image/png" !
             pngdec !
-            videoscale !
+            imagefreeze !
+	    videoscale !
             videoconvert !
             """
 
@@ -149,12 +151,12 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'pulse':
         audio_src = """
-                pulsesrc {attribs} {base_audio_attribs} name=audiosrc ! queue ! audiorate !
+                pulsesrc {attribs} {base_audio_attribs} name=audiosrc ! queue max-size-time=4000000000 ! audiorate !
                 """
 
     elif args.audio_source == 'alsa':
         audio_src = """
-                alsasrc {attribs} {base_audio_attribs} name=audiosrc ! queue ! audiorate !
+                alsasrc {attribs} {base_audio_attribs} name=audiosrc ! queue max-size-time=4000000000 ! audiorate !
                 """
 
     elif args.audio_source == 'blackmagic':
