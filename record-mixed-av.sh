@@ -1,7 +1,10 @@
 #!/bin/sh
 
+# $1 - destination dir. default: ~/Videos 
+# files will be $dest_dir/$date/$time.gs.ts
+# (.gs to keep these apart from the files created by record-timestamp.sh)
 
-dest_dir=$1/$HOSTNAME/$(date +%Y-%m-%d)
+dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
 
 mkdir -p $dest_dir
 
@@ -25,5 +28,5 @@ gst-launch-1.0 \
         mux. \
     \
     mpegtsmux name=mux !\
-        filesink location="$dest_dir/$HOSTNAME/$(date +%H_%M_%S).gs.ts"
+        filesink location="$dest_dir/$(date +%H_%M_%S).gs.ts"
 

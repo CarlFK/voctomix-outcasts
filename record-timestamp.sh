@@ -2,10 +2,14 @@
 
 # note: this script will crash at midnight, maybe.
 
-dest_dir=$1
-segment_time=1800
+# $1 - destination dir. default: ~/Videos 
+# files will be $dest_dir/$date/$time.ts
 
-mkdir -p $dest_dir/$HOSTNAME/$(date +%Y-%m-%d)
+dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
+
+segment_time=1800  # 30 min
+
+mkdir -p $dest_dir/$(date +%Y-%m-%d)
 
 ffmpeg \
     -i tcp://$VOC_CORE:11000 \
@@ -15,6 +19,6 @@ ffmpeg \
         -flags +global_header -flags +ilme+ildct \
         -f segment -segment_time $segment_time \
          -segment_format mpegts \
-         -strftime 1 "$dest_dir/$HOSTNAME/%Y-%m-%d/%H_%M_%S.ts"
+         -strftime 1 "$dest_dir/%Y-%m-%d/%H_%M_%S.ts"
 
 
