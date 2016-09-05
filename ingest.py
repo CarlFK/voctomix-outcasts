@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-
-# ingest.py
 """
-Source client for Voctomix.
+ingest.py: source client for Voctomix.
+
+Ryan Verner <ryan@nextdayvideo.com.au>
+Carl Karsten <carl@nextdayvideo.com>
+
 Features:
     Retrieves audio and video-caps config from core.
     Uses core's clock.
-    Mix and match audio and video sources muxed into one streem.
+    Mix and match audio and video sources muxed into one stream.
     Can display video locally, including frame count and fps.
     Defaults to test audio and video sent to local core.
-
 """
 
 import argparse
@@ -31,39 +32,39 @@ import lib.connection as Connection
 
 
 def mk_video_src(args, videocaps):
-    # make video soure part of pipeline
+    # make video source part of pipeline
 
-    d={ 'attribs': args.video_attribs }
+    d = { 'attribs': args.video_attribs }
 
     d['monitor'] = """tee name=t ! queue !
-                    videoconvert ! fpsdisplaysink sync=false 
+                    videoconvert ! fpsdisplaysink sync=false
                     t. ! queue !""" \
         if args.monitor else ""
 
     if args.video_source == 'dv':
         video_src = """
             dv1394src name=videosrc {attribs} !
-		dvdemux name=demux !
-		queue !
-		dvdec !
+        dvdemux !
+        queue max-size-time=4000000000 !
+        dvdec !
                 {monitor}
-		deinterlace mode=1 !
-		videoconvert !
-                videorate !
-                videoscale !
+        deinterlace mode=1 !
+        videoconvert !
+        videorate !
+        videoscale !
             """
-    
+
     elif args.video_source == 'hdv':
         video_src = """
-            hdv1394src {attribs} do-timestamp=true name=videosrc !
-		tsdemux name=demux!
-		queue !
-		decodebin !
+            hdv1394src {attribs} name=videosrc !
+        tsdemux !
+        queue max-size-time=4000000000 !
+        decodebin !
                 {monitor}
-		deinterlace mode=1 !
-		videorate !
-                videoscale !
-		videoconvert !
+        deinterlace mode=1 !
+        videorate !
+        videoscale !
+        videoconvert !
             """
 
     elif args.video_source == 'hdmi2usb':
@@ -71,8 +72,8 @@ def mk_video_src(args, videocaps):
         # Note: this code works with 720p
         video_src = """
             v4l2src {attribs} name=videosrc !
-                queue !
-		image/jpeg,width=1280,height=720 !
+                queue max-size-time=4000000000 !
+        image/jpeg,width=1280,height=720 !
                 jpegdec !
                 {monitor}
                 videoconvert !
@@ -82,10 +83,10 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'ximage':
         video_src = """
-            ximagesrc {attribs} name=videosrc 
+            ximagesrc {attribs} name=videosrc
                    use-damage=false !
                 {monitor}
-		videoconvert !
+        videoconvert !
                 videorate !
                 videoscale !
             """
@@ -95,7 +96,7 @@ def mk_video_src(args, videocaps):
         video_src = """
             decklinkvideosrc {attribs} !
                 {monitor}
-		videoconvert !
+        videoconvert !
                 videorate !
                 videoscale !
             """
@@ -104,9 +105,10 @@ def mk_video_src(args, videocaps):
     elif args.video_source == 'png':
         video_src = """
             multifilesrc {attribs}
-                loop=1
+                loop=0
                 caps="image/png" !
             pngdec !
+            imagefreeze !
             videoscale !
                 {monitor}
             videoconvert !
@@ -120,7 +122,7 @@ def mk_video_src(args, videocaps):
 
         video_src = """
             videotestsrc name=videosrc {attribs} !
-                clockoverlay text="Source:{hostname}\nCaps:{videocaps}" 
+                clockoverlay text="Source:{hostname}\nCaps:{videocaps}"
                     halignment=left line-alignment=left !
                 {monitor}
             """
@@ -133,7 +135,10 @@ def mk_video_src(args, videocaps):
 
 def mk_audio_src(args, audiocaps):
 
-    d={ 'attribs': args.audio_attribs }
+    d = {
+        'attribs': args.audio_attribs,
+        'base_audio_attribs': 'provide-clock=false slave-method=re-timestamp'
+    }
 
     if args.audio_source in [ 'dv', 'hdv' ]:
         # this only works if video is from DV also.
@@ -145,12 +150,12 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'pulse':
         audio_src = """
-                pulsesrc {attribs} name=audiosrc !
+                pulsesrc {attribs} {base_audio_attribs} name=audiosrc ! queue max-size-time=4000000000 ! audiorate !
                 """
 
     elif args.audio_source == 'alsa':
         audio_src = """
-                alsasrc {attribs} name=audiosrc !
+                alsasrc {attribs} {base_audio_attribs} name=audiosrc ! queue max-size-time=4000000000 ! audiorate !
                 """
 
     elif args.audio_source == 'blackmagic':
@@ -163,7 +168,7 @@ def mk_audio_src(args, audiocaps):
             audiotestsrc {attribs} name=audiosrc freq=330 !
             """
     audio_src = audio_src.format(**d)
-        
+
     audio_src += audiocaps + "!\n"
 
     return audio_src
@@ -180,7 +185,7 @@ def mk_pipeline(args, server_caps, core_ip):
 
     video_src = mk_video_src(args, server_caps['videocaps'])
     audio_src = mk_audio_src(args, server_caps['audiocaps'])
-    
+
     client = mk_client(core_ip,args.port)
 
     pipeline = """
@@ -201,7 +206,7 @@ def mk_pipeline(args, server_caps, core_ip):
     if args.debug:
         gst_cmd = "gst-launch-1.0 {}".format(pipeline)
 
-        # escape the ! because  
+        # escape the ! because
         # asl2: ! is interpreted as a command history metacharacter
         gst_cmd = gst_cmd.replace("!"," \! ")
 
@@ -218,7 +223,7 @@ def mk_pipeline(args, server_caps, core_ip):
 def get_server_caps(core_ip):
 
     # establish a synchronus connection to server
-    Connection.establish(core_ip) 
+    Connection.establish(core_ip)
 
     # fetch config from server
     server_config = Connection.fetchServerConfig()
@@ -233,7 +238,7 @@ def get_server_caps(core_ip):
 
 def get_clock(core_ip, core_clock_port=9998):
 
-    clock = GstNet.NetClientClock.new( 'voctocore', 
+    clock = GstNet.NetClientClock.new( 'voctocore',
             core_ip, core_clock_port, 0)
 
     print('obtained NetClientClock from host: {ip}:{port}'.format(
@@ -245,7 +250,7 @@ def get_clock(core_ip, core_clock_port=9998):
     return clock
 
 
-def run_pipeline(pipeline, clock):
+def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
 
     print('starting pipeline...')
     senderPipeline = Gst.parse_launch(pipeline)
@@ -262,6 +267,19 @@ def run_pipeline(pipeline, clock):
         print('Error-Details: #%u: %s' % (error.code, debug))
         sys.exit(2)
 
+    # Delay video/audio if required
+    NS_TO_MS = 100000
+
+    if video_delay > 0:
+        video_delay = video_delay * NS_TO_MS
+        print('Adjusting video sync: [{} milliseconds]'.format(video_delay))
+        videosrc = senderPipeline.get_by_name('videosrc')
+        videosrc.get_static_pad('src').set_offset(video_delay)
+    if audio_delay > 0:
+        audio_delay = audio_delay * NS_TO_MS
+        print('Adjusting audio sync: [{} milliseconds]'.format(audio_delay))
+        audiosrc = senderPipeline.get_by_name('audiosrc')
+        audiosrc.get_static_pad('src').set_offset(audio_delay)
 
     # Binding End-of-Stream-Signal on Source-Pipeline
     senderPipeline.bus.add_signal_watch()
@@ -270,7 +288,7 @@ def run_pipeline(pipeline, clock):
 
     print("playing...")
     senderPipeline.set_state(Gst.State.PLAYING)
- 
+
     mainloop = GObject.MainLoop()
     try:
         mainloop.run()
@@ -290,38 +308,48 @@ def get_args():
             Gst caps are retrieved from the server.
             Run without parameters: send test av to localhost:10000
             ''')
-    
+
     parser.add_argument('-v', '--verbose', action='count', default=0,
             help="Also print INFO and DEBUG messages.")
 
-    parser.add_argument( '--video-source', action='store', 
+    parser.add_argument('--video-source', action='store',
             choices=[
                 'dv', 'hdv', 'hdmi2usb', 'blackmagic',
-                'ximage', 'png', 'test'], 
+                'ximage', 'png', 'test'],
             default='test',
             help="Where to get video from")
 
-    parser.add_argument( '--video-attribs', action='store', 
+    parser.add_argument('--video-attribs', action='store',
             default='',
             help="misc video attributes for gst")
 
-    parser.add_argument( '--audio-source', action='store', 
-            choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'], 
+    parser.add_argument('--video-delay', action='store',
+        default='0',
+        type=int,
+        help="delay video by this many milliseconds")
+
+    parser.add_argument('--audio-source', action='store',
+            choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'],
             default='test',
             help="Where to get audio from")
 
-    parser.add_argument( '--audio-attribs', action='store', 
+    parser.add_argument('--audio-attribs', action='store',
             default='',
             help="misc audio attributes for gst")
+
+    parser.add_argument('--audio-delay', action='store',
+            default='0',
+            type=int,
+            help="delay audio by this many milliseconds")
 
     parser.add_argument('-m', '--monitor', action='store_true',
             help="fps display sink")
 
-    parser.add_argument( '--host', action='store', 
+    parser.add_argument('--host', action='store',
             default='localhost',
             help="hostname of vocto core")
 
-    parser.add_argument( '--port', action='store', 
+    parser.add_argument('--port', action='store',
             default='10000',
             help="port of vocto core")
 
@@ -332,18 +360,18 @@ def get_args():
 
     return args
 
-    
+
 def main():
-    
+
     args = get_args()
     core_ip = socket.gethostbyname(args.host)
 
     server_caps = get_server_caps(core_ip)
-    pipeline = mk_pipeline(args, server_caps, core_ip )
+    pipeline = mk_pipeline(args, server_caps, core_ip)
 
     clock = get_clock(core_ip)
 
-    run_pipeline(pipeline, clock)
+    run_pipeline(pipeline, clock, args.audio_delay, args.video_delay)
 
 
 if __name__ == '__main__':
