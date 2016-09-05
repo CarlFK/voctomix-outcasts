@@ -6,7 +6,7 @@ dest_dir=$1/$HOSTNAME/$(date +%Y-%m-%d)
 mkdir -p $dest_dir
 
 gst-launch-1.0 \
-    tcpclientsrc host=127.0.0.1 port=11000 !\
+    tcpclientsrc host=127.0.0.1 port=4954 !\
     \
     matroskademux name=demux \
     \
