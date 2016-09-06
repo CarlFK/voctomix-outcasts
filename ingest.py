@@ -121,10 +121,11 @@ def mk_video_src(args, videocaps):
         d['videocaps'] = videocaps
 
         video_src = """
-            videotestsrc name=videosrc {attribs} !
-                clockoverlay text="Source:{hostname}\nCaps:{videocaps}"
-                    halignment=left line-alignment=left !
-                {monitor}
+videotestsrc name=videosrc {attribs} !
+    clockoverlay 
+        text="Source:{hostname}\nCaps:{videocaps}\nAttribs:{attribs}\n"
+        halignment=left line-alignment=left !
+    {monitor}
             """
 
     video_src = video_src.format( **d )
@@ -252,11 +253,6 @@ def get_clock(core_ip, core_clock_port=9998):
 
 def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
 
-    print('starting pipeline...')
-    senderPipeline = Gst.parse_launch(pipeline)
-    senderPipeline.use_clock(clock)
-    src = senderPipeline.get_by_name('src')
-
     def on_eos(bus, message):
         print('Received EOS-Signal')
         sys.exit(1)
@@ -267,17 +263,22 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
         print('Error-Details: #%u: %s' % (error.code, debug))
         sys.exit(2)
 
+    print('starting pipeline...')
+    senderPipeline = Gst.parse_launch(pipeline)
+    senderPipeline.use_clock(clock)
+
     # Delay video/audio if required
     NS_TO_MS = 100000
 
     if video_delay > 0:
-        video_delay = video_delay * NS_TO_MS
         print('Adjusting video sync: [{} milliseconds]'.format(video_delay))
+        video_delay = video_delay * NS_TO_MS
         videosrc = senderPipeline.get_by_name('videosrc')
         videosrc.get_static_pad('src').set_offset(video_delay)
+
     if audio_delay > 0:
-        audio_delay = audio_delay * NS_TO_MS
         print('Adjusting audio sync: [{} milliseconds]'.format(audio_delay))
+        audio_delay = audio_delay * NS_TO_MS
         audiosrc = senderPipeline.get_by_name('audiosrc')
         audiosrc.get_static_pad('src').set_offset(audio_delay)
 
@@ -324,7 +325,7 @@ def get_args():
             help="misc video attributes for gst")
 
     parser.add_argument('--video-delay', action='store',
-        default='0',
+        default=0,
         type=int,
         help="delay video by this many milliseconds")
 
@@ -338,7 +339,7 @@ def get_args():
             help="misc audio attributes for gst")
 
     parser.add_argument('--audio-delay', action='store',
-            default='0',
+            default=0,
             type=int,
             help="delay audio by this many milliseconds")
 
