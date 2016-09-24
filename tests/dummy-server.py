@@ -52,14 +52,24 @@ class NetTimeClock(object):
 class VideoSink(object):
     def __init__(self):
         print('Listening for stream on port {}'.format(10000))
+        self.start()
+
+    def start(self):
         self.pipeline = Gst.parse_launch(
-            'tcpserversrc host=0.0.0.0 port=10000 ! '
+            'tcpserversrc host=0.0.0.0 port=10000 name=server ! '
             'decodebin ! videoconvert ! xvimagesink'
         )
+        self.pipeline.bus.add_signal_watch()
+        self.pipeline.bus.connect("message::eos", self.on_eos)
         self.pipeline.set_state(Gst.State.PLAYING)
 
     def stop(self):
         self.pipeline.set_state(Gst.State.NULL)
+        del self.pipeline
+
+    def on_eos(self, bus, message):
+        self.stop()
+        self.start()
 
 
 def main():
