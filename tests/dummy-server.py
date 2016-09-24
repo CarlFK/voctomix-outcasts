@@ -24,18 +24,19 @@ CONFIG = {
 class VoctoMixProtocol(asyncio.Protocol):
     def connection_made(self, transport):
         peername = transport.get_extra_info('peername')
-        print('Connection from {}'.format(peername))
+        print('Control connection from {}'.format(peername))
         self.transport = transport
 
     def data_received(self, data):
         message = data.decode()
-        print('Data received: {!r}'.format(message))
 
         if message == 'get_config\n':
             self.transport.write(
                 'server_config {}\n'
                 .format(json.dumps(CONFIG)).encode('utf-8')
             )
+        else:
+            print('Unknown control command: {!r}'.format(message))
 
 
 class NetTimeClock(object):
