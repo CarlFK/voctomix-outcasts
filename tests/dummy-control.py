@@ -3,6 +3,13 @@
 import asyncio
 import json
 
+import gbulb
+import gi
+
+gi.require_version('Gst', '1.0')
+gi.require_version('GstNet', '1.0')
+from gi.repository import Gst, GstNet
+
 
 CONFIG = {
     'mix': {
@@ -31,7 +38,34 @@ class VoctoMixProtocol(asyncio.Protocol):
             )
 
 
+class NetTimeClock(object):
+    def __init__(self):
+        clock = Gst.SystemClock().obtain()
+        self.ntp = GstNet.NetTimeProvider.new(clock, '0.0.0.0', 9998)
+
+    def stop(self):
+        del self.ntp  # FIXME: How is one supposed to shut it down?
+
+
+class VideoSink(object):
+    def __init__(self):
+        self.pipeline = Gst.parse_launch(
+            'tcpserversrc host=0.0.0.0 port=4953 ! '
+            'decodebin ! videoconvert ! xvimagesink'
+        )
+        self.pipeline.set_state(Gst.State.PLAYING)
+
+    def stop(self):
+        self.pipeline.set_state(Gst.State.NULL)
+
+
 def main():
+    Gst.init([])
+    gbulb.install()
+
+    clock = NetTimeClock()
+    sink = VideoSink()
+
     loop = asyncio.get_event_loop()
     coro = loop.create_server(VoctoMixProtocol, '0.0.0.0', 9999)
     server = loop.run_until_complete(coro)
@@ -43,7 +77,13 @@ def main():
         pass
 
     server.close()
-    loop.run_until_complete(server.wait_closed())
+    clock.stop()
+    sink.stop()
+    try:
+        loop.run_until_complete(server.wait_closed())
+    except KeyboardInterrupt:
+        # Gets carried through to here under glib main loop, for some reason...
+        pass
     loop.close()
 
 if __name__ == '__main__':
