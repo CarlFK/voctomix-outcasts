@@ -42,6 +42,7 @@ class NetTimeClock(object):
     def __init__(self):
         clock = Gst.SystemClock().obtain()
         self.ntp = GstNet.NetTimeProvider.new(clock, '0.0.0.0', 9998)
+        print('Clock listening on UDP port {}'.format(9998))
 
     def stop(self):
         del self.ntp  # FIXME: How is one supposed to shut it down?
@@ -49,8 +50,9 @@ class NetTimeClock(object):
 
 class VideoSink(object):
     def __init__(self):
+        print('Listening for stream on port {}'.format(10000))
         self.pipeline = Gst.parse_launch(
-            'tcpserversrc host=0.0.0.0 port=4953 ! '
+            'tcpserversrc host=0.0.0.0 port=10000 ! '
             'decodebin ! videoconvert ! xvimagesink'
         )
         self.pipeline.set_state(Gst.State.PLAYING)
@@ -70,7 +72,8 @@ def main():
     coro = loop.create_server(VoctoMixProtocol, '0.0.0.0', 9999)
     server = loop.run_until_complete(coro)
 
-    print('Listening on {}'.format(server.sockets[0].getsockname()))
+    print('Control server listening on {}'.format(
+          server.sockets[0].getsockname()))
     try:
         loop.run_forever()
     except KeyboardInterrupt:
