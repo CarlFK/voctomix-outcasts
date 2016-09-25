@@ -24,24 +24,26 @@ CONFIG = {
 class VoctoMixProtocol(asyncio.Protocol):
     def connection_made(self, transport):
         peername = transport.get_extra_info('peername')
-        print('Connection from {}'.format(peername))
+        print('Control connection from {}'.format(peername))
         self.transport = transport
 
     def data_received(self, data):
         message = data.decode()
-        print('Data received: {!r}'.format(message))
 
         if message == 'get_config\n':
             self.transport.write(
                 'server_config {}\n'
                 .format(json.dumps(CONFIG)).encode('utf-8')
             )
+        else:
+            print('Unknown control command: {!r}'.format(message))
 
 
 class NetTimeClock(object):
     def __init__(self):
         clock = Gst.SystemClock().obtain()
         self.ntp = GstNet.NetTimeProvider.new(clock, '0.0.0.0', 9998)
+        print('Clock listening on UDP port {}'.format(9998))
 
     def stop(self):
         del self.ntp  # FIXME: How is one supposed to shut it down?
@@ -49,14 +51,25 @@ class NetTimeClock(object):
 
 class VideoSink(object):
     def __init__(self):
+        print('Listening for stream on port {}'.format(10000))
+        self.start()
+
+    def start(self):
         self.pipeline = Gst.parse_launch(
-            'tcpserversrc host=0.0.0.0 port=4953 ! '
+            'tcpserversrc host=0.0.0.0 port=10000 name=server ! '
             'decodebin ! videoconvert ! xvimagesink'
         )
+        self.pipeline.bus.add_signal_watch()
+        self.pipeline.bus.connect("message::eos", self.on_eos)
         self.pipeline.set_state(Gst.State.PLAYING)
 
     def stop(self):
         self.pipeline.set_state(Gst.State.NULL)
+        del self.pipeline
+
+    def on_eos(self, bus, message):
+        self.stop()
+        self.start()
 
 
 def main():
@@ -70,7 +83,8 @@ def main():
     coro = loop.create_server(VoctoMixProtocol, '0.0.0.0', 9999)
     server = loop.run_until_complete(coro)
 
-    print('Listening on {}'.format(server.sockets[0].getsockname()))
+    print('Control server listening on {}'.format(
+          server.sockets[0].getsockname()))
     try:
         loop.run_forever()
     except KeyboardInterrupt:
