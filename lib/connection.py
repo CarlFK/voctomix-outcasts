@@ -12,33 +12,33 @@ command_queue = Queue()
 signal_handlers = {}
 
 def establish(host):
-	global conn, port, log, ip
+    global conn, port, log, ip
 
-	log.info('establishing Connection to %s', host)
-	conn = socket.create_connection( (host, port) )
-	log.debug('Connection successful \o/')
+    log.info('establishing Connection to %s', host)
+    conn = socket.create_connection( (host, port) )
+    log.debug('Connection successful \o/')
 
-	ip = conn.getpeername()[0]
-	log.debug('Remote-IP is %s', ip)
+    ip = conn.getpeername()[0]
+    log.debug('Remote-IP is %s', ip)
 
 def fetchServerConfig():
-	global conn, log
+    global conn, log
 
-	log.info('reading server-config')
-	fd = conn.makefile('rw')
-	fd.write("get_config\n")
-	fd.flush()
+    log.info('reading server-config')
+    fd = conn.makefile('rw')
+    fd.write("get_config\n")
+    fd.flush()
 
-	while True:
-		line = fd.readline()
-		words = line.split(' ')
+    while True:
+        line = fd.readline()
+        words = line.split(' ')
 
-		signal = words[0]
-		args = words[1:]
+        signal = words[0]
+        args = words[1:]
 
-		if signal != 'server_config':
-			continue
+        if signal != 'server_config':
+            continue
 
-		server_config_json = " ".join(args)
-		server_config = json.loads(server_config_json)
-		return server_config
+        server_config_json = " ".join(args)
+        server_config = json.loads(server_config_json)
+        return server_config
