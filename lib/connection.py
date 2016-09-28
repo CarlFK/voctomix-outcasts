@@ -1,7 +1,7 @@
+from queue import Queue
+import json
 import logging
 import socket
-import json
-from queue import Queue
 
 
 log = logging.getLogger('Connection')
@@ -11,15 +11,17 @@ port = 9999
 command_queue = Queue()
 signal_handlers = {}
 
+
 def establish(host):
     global conn, port, log, ip
 
     log.info('establishing Connection to %s', host)
-    conn = socket.create_connection( (host, port) )
+    conn = socket.create_connection((host, port))
     log.debug('Connection successful \o/')
 
     ip = conn.getpeername()[0]
     log.debug('Remote-IP is %s', ip)
+
 
 def fetchServerConfig():
     global conn, log
