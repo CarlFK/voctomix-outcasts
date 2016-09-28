@@ -1,46 +1,35 @@
-from queue import Queue
 import json
 import logging
 import socket
 
 
 log = logging.getLogger('Connection')
-conn = None
-ip = None
-port = 9999
-command_queue = Queue()
-signal_handlers = {}
 
 
-def establish(host):
-    global conn, port, log, ip
+class Connection(object):
+    def __init__(self, host, port=9999):
+        self.host = host
+        self.port = port
 
-    log.info('establishing Connection to %s', host)
-    conn = socket.create_connection((host, port))
-    log.debug('Connection successful \o/')
+        log.info('Establishing connection to %s', host)
+        self.sock = socket.create_connection((host, port))
 
-    ip = conn.getpeername()[0]
-    log.debug('Remote-IP is %s', ip)
+        log.debug('Connection successful \o/')
+        ip = self.sock.getpeername()[0]
+        log.debug('Remote-IP is %s', ip)
 
+    def fetch_config(self):
+        log.info('Reading server-config')
+        fd = self.sock.makefile('rw')
+        fd.write('get_config\n')
+        fd.flush()
 
-def fetchServerConfig():
-    global conn, log
+        while True:
+            line = fd.readline()
+            signal, _, args = line.partition(' ')
 
-    log.info('reading server-config')
-    fd = conn.makefile('rw')
-    fd.write("get_config\n")
-    fd.flush()
+            if signal != 'server_config':
+                continue
 
-    while True:
-        line = fd.readline()
-        words = line.split(' ')
-
-        signal = words[0]
-        args = words[1:]
-
-        if signal != 'server_config':
-            continue
-
-        server_config_json = " ".join(args)
-        server_config = json.loads(server_config_json)
-        return server_config
+            server_config = json.loads(args)
+            return server_config

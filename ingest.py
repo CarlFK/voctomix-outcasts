@@ -14,21 +14,17 @@ Features:
 """
 
 import argparse
-import gi
 import os
 import signal
 import socket
 import sys
 
+import gi
 gi.require_version('Gst', '1.0')
 gi.require_version('GstNet', '1.0')
 from gi.repository import Gst, GstNet, GObject
 
-# init GObject & Co. before importing local classes
-GObject.threads_init()
-Gst.init([])
-
-import lib.connection as Connection
+from lib.connection import Connection
 
 
 def mk_video_src(args, videocaps):
@@ -222,12 +218,10 @@ def mk_pipeline(args, server_caps, core_ip):
     return pipeline
 
 def get_server_caps(core_ip):
-
     # establish a synchronus connection to server
-    Connection.establish(core_ip)
-
+    conn = Connection(core_ip)
     # fetch config from server
-    server_config = Connection.fetchServerConfig()
+    server_config = conn.fetch_config()
 
     # Pull out the configs relevant to this client
     server_caps = {
@@ -363,6 +357,8 @@ def get_args():
 
 
 def main():
+    GObject.threads_init()
+    Gst.init([])
 
     args = get_args()
     core_ip = socket.gethostbyname(args.host)
