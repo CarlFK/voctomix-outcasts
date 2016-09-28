@@ -40,7 +40,7 @@ def mk_video_src(args, videocaps):
     if args.video_source == 'dv':
         video_src = """
             dv1394src name=videosrc {attribs} !
-        dvdemux !
+        dvdemux name=demux !
         queue max-size-time=4000000000 !
         dvdec !
                 {monitor}
