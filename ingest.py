@@ -141,7 +141,8 @@ def mk_audio_src(args, audiocaps):
         # this only works if video is from DV also.
         # or some gst source that gets demux ed
         audio_src = """
-            demux. !
+            demux.audio !
+                queue !
                 audioconvert !
                 """
 
