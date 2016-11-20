@@ -13,23 +13,39 @@
 # all copies or substantial portions of the Software.
 
 
+import argparse
 import socket
 import datetime
 import sys
 
-host = 'localhost'
-port = 9999
 
-conn = socket.create_connection((host, port))
-fd = conn.makefile('rw')
+def capture_cuts(sock):
+    """Listen to a voctocore control socket, and yield on cuts"""
+    fd = sock.makefile('rw')
+    for line in fd:
+        words = line.rstrip('\n').split(' ')
 
-for line in fd:
-    words = line.rstrip('\n').split(' ')
+        signal = words[0]
+        args = words[1:]
 
-    signal = words[0]
-    args = words[1:]
+        if signal == 'message' and args[0] == 'cut':
+            yield
 
-    if signal == 'message' and args[0] == 'cut':
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('--host', default='localhost',
+                   help='Hostname of voctocore')
+    p.add_argument('--port', type=int, default=9999,
+                   help='Port to connect to, on voctocore')
+    args = p.parse_args()
+
+    sock = socket.create_connection((args.host, args.port))
+    for cut in capture_cuts(sock):
         ts = datetime.datetime.now().strftime("%Y-%m-%d/%H_%M_%S")
         print(ts)
         sys.stdout.flush()
+
+
+if __name__ == '__main__':
+    main()
