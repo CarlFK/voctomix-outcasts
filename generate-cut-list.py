@@ -38,6 +38,8 @@ def main():
                    help='Hostname of voctocore')
     p.add_argument('--port', type=int, default=9999,
                    help='Port to connect to, on voctocore')
+    p.add_argument('--file', type=argparse.FileType('w'),
+                   help='Filename to write cuts to')
     args = p.parse_args()
 
     sock = socket.create_connection((args.host, args.port))
@@ -45,6 +47,9 @@ def main():
         ts = datetime.datetime.now().strftime("%Y-%m-%d/%H_%M_%S")
         print(ts)
         sys.stdout.flush()
+        if args.file:
+            args.file.write('%s\n' % ts)
+            args.file.flush()
 
 
 if __name__ == '__main__':
