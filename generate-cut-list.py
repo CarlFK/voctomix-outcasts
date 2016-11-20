@@ -8,7 +8,7 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
@@ -20,16 +20,16 @@ import sys
 host = 'localhost'
 port = 9999
 
-conn = socket.create_connection( (host, port) )
+conn = socket.create_connection((host, port))
 fd = conn.makefile('rw')
 
 for line in fd:
-	words = line.rstrip('\n').split(' ')
+    words = line.rstrip('\n').split(' ')
 
-	signal = words[0]
-	args = words[1:]
+    signal = words[0]
+    args = words[1:]
 
-	if signal == 'message' and args[0] == 'cut':
-		ts = datetime.datetime.now().strftime("%Y-%m-%d/%H_%M_%S")
-		print(ts)
-		sys.stdout.flush()
+    if signal == 'message' and args[0] == 'cut':
+        ts = datetime.datetime.now().strftime("%Y-%m-%d/%H_%M_%S")
+        print(ts)
+        sys.stdout.flush()
