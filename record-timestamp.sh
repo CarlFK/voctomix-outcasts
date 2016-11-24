@@ -17,7 +17,8 @@
 # $1 - destination dir. default: ~/Videos 
 # files will be $dest_dir/$date/$time.ts
 
-dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
+# dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
+dest_dir=${1:-~/Videos}
 
 segment_time=1800  # 30 min
 
