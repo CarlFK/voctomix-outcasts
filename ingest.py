@@ -250,7 +250,7 @@ def get_clock(core_ip, core_clock_port=9998):
     print('obtained NetClientClock from host: {ip}:{port}'.format(
         ip=core_ip, port=core_clock_port) )
 
-    print('waiting for NetClientClock to sync…')
+    print('waiting for NetClientClock to sync...')
     clock.wait_for_sync(Gst.CLOCK_TIME_NONE)
 
     return clock
