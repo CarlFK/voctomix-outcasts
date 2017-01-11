@@ -38,7 +38,7 @@ def main():
                    help='Hostname of voctocore')
     p.add_argument('--port', type=int, default=9999,
                    help='Port to connect to, on voctocore')
-    p.add_argument('--file', type=argparse.FileType('w'),
+    p.add_argument('--file', type=argparse.FileType('a'),
                    help='Filename to write cuts to')
     args = p.parse_args()
 
