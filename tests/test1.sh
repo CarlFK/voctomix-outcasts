@@ -8,5 +8,6 @@ sleep 5
 ./voctogui/voctogui.py &
 ../voctomix-outcasts/ingest.py &
 ../voctomix-outcasts/ingest.py --video-attribs "pattern=ball" --port 10001 &
-./example-scripts/gstreamer/record-mixed-av.sh &
-./example-scripts/control-server/generate-cut-list.py
+../voctomix-outcasts/record-timestamp.sh &
+../voctomix-outcasts/generate-cut-list.py --file foo.log
+
