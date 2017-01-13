@@ -24,8 +24,6 @@ Features:
 """
 
 import argparse
-import os
-import signal
 import socket
 import sys
 
