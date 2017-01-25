@@ -10,7 +10,7 @@ ingest.py: source client for Voctomix.
    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
    copies of the Software, and to permit persons to whom the Software is
    furnished to do so, subject to the following conditions:
- 
+
    The above copyright notice and this permission notice shall be included in
    all copies or substantial portions of the Software.
 
@@ -128,7 +128,7 @@ def mk_video_src(args, videocaps):
 
         video_src = """
 videotestsrc name=videosrc {attribs} !
-    clockoverlay 
+    clockoverlay
         text="Source:{hostname}\nCaps:{videocaps}\nAttribs:{attribs}\n"
         halignment=left line-alignment=left !
     {monitor}
@@ -228,19 +228,31 @@ def mk_pipeline(args, server_caps, core_ip):
 
     return pipeline
 
-def get_server_caps(core_ip):
+def get_server_conf(core_ip, source_id, args):
+
     # establish a synchronus connection to server
     conn = Connection(core_ip)
+
     # fetch config from server
     server_config = conn.fetch_config()
 
     # Pull out the configs relevant to this client
-    server_caps = {
+    server_conf = {
         'videocaps': server_config['mix']['videocaps'],
         'audiocaps': server_config['mix']['audiocaps']
         }
 
-    return server_caps
+    if source_id is not None:
+        d=server_config[source_id]
+        # get conf from server for this source,
+        # stomp all over command line values
+        # this is backwards: command line should override conf file.
+        for k in d:
+            print(k,d[k])
+            # python argparse converts a-b to a_b, so we will to too.
+            args.__setattr__(k.replace("-", "_"),d[k])
+
+    return server_conf
 
 def get_clock(core_ip, core_clock_port=9998):
 
@@ -318,6 +330,9 @@ def get_args():
     parser.add_argument('-v', '--verbose', action='count', default=0,
             help="Also print INFO and DEBUG messages.")
 
+    parser.add_argument('--source-id', action='store',
+            help="get config from server using this id.")
+
     parser.add_argument('--video-source', action='store',
             choices=[
                 'dv', 'hdv', 'hdmi2usb', 'blackmagic',
@@ -374,7 +389,8 @@ def main():
     args = get_args()
     core_ip = socket.gethostbyname(args.host)
 
-    server_caps = get_server_caps(core_ip)
+    server_caps = get_server_conf(core_ip, args.source_id, args)
+
     pipeline = mk_pipeline(args, server_caps, core_ip)
 
     clock = get_clock(core_ip)
