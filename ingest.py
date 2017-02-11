@@ -2,8 +2,8 @@
 """
 ingest.py: source client for Voctomix.
 
-   Copyright: 2015,2016    Carl F. Karsten <carl@nextdayvideo.com>,
-                           Ryan Verner <ryan@nextdayvideo.com.au>
+   Copyright: 2015,2016,2017 Carl F. Karsten <carl@nextdayvideo.com>,
+                             Ryan Verner <ryan@nextdayvideo.com.au>
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to
@@ -18,6 +18,7 @@ ingest.py: source client for Voctomix.
 
 Features:
     Retrieves audio and video-caps config from core.
+      and client config
     Uses core's clock.
     Mix and match audio and video sources muxed into one stream.
     Can display video locally, including frame count and fps.
@@ -25,6 +26,7 @@ Features:
 """
 
 import argparse
+from pprint import pprint
 import socket
 import sys
 
@@ -41,10 +43,17 @@ def mk_video_src(args, videocaps):
 
     d = {'attribs': args.video_attribs}
 
-    d['monitor'] = """tee name=t ! queue !
+    if args.monitor:
+        if args.debug:
+            d['monitor'] = """tee name=t ! queue !
                     videoconvert ! fpsdisplaysink sync=false
-                    t. ! queue !""" \
-        if args.monitor else ""
+                    t. ! queue !"""
+        else:
+            d['monitor'] = """tee name=t ! queue !
+                    videoconvert ! autovideosink sync=false
+                    t. ! queue !"""
+    else:
+        d['monitor'] = ""
 
     if args.video_source == 'dv':
         video_src = """
@@ -246,16 +255,21 @@ def get_server_conf(core_ip, source_id, args):
         }
 
     if source_id is not None:
-        d=server_config[source_id]
+
         # get conf from server for this source,
+        d=server_config[source_id]
+        if args.debug:
+            pprint(d)
+
         # stomp all over command line values
         # this is backwards: command line should override conf file.
         for k in d:
-            print(k,d[k])
+            if args.debug:
+                print('--{}="{}"'.format(k,d[k]))
             # python argparse converts a-b to a_b, so we will to too.
             args.__setattr__(k.replace("-", "_"),d[k])
 
-    return server_conf
+    return server_conf, args
 
 
 def get_clock(core_ip, core_clock_port=9998):
@@ -403,7 +417,7 @@ def main():
     args = get_args()
     core_ip = socket.gethostbyname(args.host)
 
-    server_caps = get_server_conf(core_ip, args.source_id, args)
+    server_caps, args = get_server_conf(core_ip, args.source_id, args)
 
     pipeline = mk_pipeline(args, server_caps, core_ip)
 

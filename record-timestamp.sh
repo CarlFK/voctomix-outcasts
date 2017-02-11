@@ -1,4 +1,4 @@
-#!/bin/bash -ex 
+#!/bin/bash -ex
 # Copyright: 2015,2016    Carl F. Karsten <carl@nextdayvideo.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -7,14 +7,17 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
 
-# note: this script will crash at midnight, maybe.
+# note: this script will crash at midnight.
+# [segment @ 0x13bb960] Failed to open segment '.../2017-02-07/00_17_55.ts'
+# av_interleaved_write_frame(): No such file or directory
 
-# $1 - destination dir. default: ~/Videos 
+
+# $1 - destination dir. default: ~/Videos
 # files will be $dest_dir/$date/$time.ts
 
 # dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
