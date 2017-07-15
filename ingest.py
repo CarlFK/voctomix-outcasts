@@ -282,6 +282,7 @@ def get_clock(core_ip, core_clock_port=9998):
 
     print('waiting for NetClientClock to sync...')
     clock.wait_for_sync(Gst.CLOCK_TIME_NONE)
+    print('synced with NetClientClock.')
 
     return clock
 
