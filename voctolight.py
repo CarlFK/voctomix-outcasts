@@ -180,23 +180,19 @@ class FakeLedActor:
 class SerialDTRActor:
     def __init__(self, config):
         self.fn = config.get('light', 'port')
-        print('Using:', self.fn)
         self.fd = None
 
     def reset_led(self):
         if self.fd:
             self.fd.close()
-        print('LED has been reset to off')
 
     def enable_tally(self, enable):
         if enable:
             self.fd = open(self.fn)
-            print('tally on!')
         else:
             if self.fd:
                 self.fd.close()
             self.fd = None
-            print('tally off!')
 
 
 if __name__ == '__main__':
