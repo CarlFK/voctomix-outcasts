@@ -8,15 +8,6 @@ import asyncio
 import configparser
 import json
 import os.path
-import platform
-
-
-def isArm():
-    return platform.uname()[4][0:3] == 'arm'
-
-
-if (isArm()):
-    import RPi.GPIO as GPIO
 
 
 class Config(configparser.ConfigParser, object):
@@ -142,11 +133,16 @@ class Interpreter(object):
         self.config.setup_with_server_config(server_config)
 
 
-class LedActor:
+class RPiGPIODriver:
     def __init__(self, config):
+        self._import()
         self.gpios = config.get('light', 'gpios').split(',')
         self.gpio_red = int(config.get('light', 'gpio_red'))
         self.reset_led()
+
+    def _import(self):
+        global GPIO
+        import RPi.GPIO as GPIO
 
     def reset_led(self):
         GPIO.setmode(GPIO.BOARD)
@@ -163,7 +159,7 @@ class LedActor:
             GPIO.output(self.gpio_red, GPIO.HIGH)
 
 
-class FakeLedActor:
+class DebugDriver:
     def __init__(self, config):
         pass
 
@@ -177,7 +173,7 @@ class FakeLedActor:
             print('tally off!')
 
 
-class SerialDTRActor:
+class SerialDTRDriver:
     def __init__(self, config):
         self.fn = config.get('light', 'port')
         self.fd = None
@@ -205,12 +201,15 @@ if __name__ == '__main__':
         help='Show what would be done instead of toggling lights')
     args = parser.parse_args()
     config = Config(cmd_line_config=args.config)
+    driver = config.get('light', 'driver')
     if args.debug:
-        actor = FakeLedActor(config)
-    elif isArm():
-        actor = LedActor(config)
+        actor = DebugDriver(config)
+    elif driver == 'rpi':
+        actor = RPiGPIODriver(config)
+    elif driver == 'serial':
+        actor = SerialDTRDriver(config)
     else:
-        actor = SerialDTRActor(config)
+        raise Exception('Unknown driver: ' + driver)
     interpreter = Interpreter(actor, config)
     conn = Connection(interpreter)
     conn.connect(config.get('server', 'host'))
