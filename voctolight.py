@@ -26,14 +26,21 @@ class Config(configparser.ConfigParser, object):
     os.path.expanduser('~/.voctolight.ini'),
   ]
 
-  def __init__(self):
+  def __init__(self, cmd_line_config=None):
     super(Config,self).__init__()
+    self.cmd_line_config = cmd_line_config
+    self._read_config()
+
+  def _read_config(self):
     self.read(self.config_files)
+    if self.cmd_line_config:
+      self.read_file(self.cmd_line_config)
+      self.cmd_line_config.seek(0)
 
   def setup_with_server_config(self, server_config):
     self.clear()
+    self._read_config()
     self.read_dict(server_config)
-    self.read(self.config_files)
 
   def getlist(self, section, option):
     return [x.strip() for x in self.get(section, option).split(',')]
@@ -158,9 +165,10 @@ class FakeLedActor:
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Tallylight controlling daemon for voctomix.')
+  parser.add_argument("--config", type=open, help="Use a specific config file")
   parser.add_argument("--debug", action="store_true", help="Show what would be done instead of toggling lights")
   args = parser.parse_args()
-  config = Config()
+  config = Config(cmd_line_config=args.config)
   if (not isArm() or args.debug):
     actor = FakeLedActor(config)
   else:
