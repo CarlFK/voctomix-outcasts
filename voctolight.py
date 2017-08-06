@@ -80,6 +80,7 @@ class CompositeModes(Enum):
 
 class Interpreter(object):
   a_or_b = False
+  primary = False
   composite_mode = CompositeModes.fullscreen
 
   def __init__(self, actor, config):
