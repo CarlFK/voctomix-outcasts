@@ -99,10 +99,12 @@ class Interpreter(object):
     signal = words[0]
     args = words[1:]
     try:
-      self.__getattribute__("handle_"+signal)(args)
-      interpreter.compute_state()
-    except:
+      handler = getattr(self, 'handle_{}'.format(signal))
+    except AttributeError:
       print("Ignoring signal", signal)
+    else:
+      handler(args)
+      interpreter.compute_state()
 
   def handle_video_status(self, cams):
     mycam = self.config.get('light', 'cam')
