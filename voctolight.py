@@ -124,6 +124,8 @@ class Interpreter(object):
       self.composite_mode = CompositeModes.side_by_side_equal
     elif mode == "side_by_side_preview":
       self.composite_mode = CompositeModes.side_by_side_preview
+    elif mode == "picture_in_picture":
+      self.composite_mode = CompositeModes.picture_in_picture
     else:
       print("Cannot handle", mode, "of type", type(mode))
 
