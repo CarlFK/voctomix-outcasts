@@ -168,16 +168,41 @@ class FakeLedActor:
     else:
       print("tally off!")
 
+
+class SerialDTRActor:
+  def __init__(self, config):
+    self.fn = config.get('light', 'port')
+    print("Using:", self.fn)
+    self.fd = None
+
+  def reset_led(self):
+    if self.fd:
+      self.fd.close()
+    print("LED has been reset to off")
+
+  def enable_tally(self, enable):
+    if enable == True:
+      self.fd = open(self.fn)
+      print("tally on!")
+    else:
+      if self.fd:
+        self.fd.close()
+      self.fd = None
+      print("tally off!")
+
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Tallylight controlling daemon for voctomix.')
   parser.add_argument("--config", type=open, help="Use a specific config file")
   parser.add_argument("--debug", action="store_true", help="Show what would be done instead of toggling lights")
   args = parser.parse_args()
   config = Config(cmd_line_config=args.config)
-  if (not isArm() or args.debug):
+  if args.debug:
     actor = FakeLedActor(config)
-  else:
+  elif isArm():
     actor = LedActor(config)
+  else:
+    actor = SerialDTRActor(config)
   interpreter = Interpreter(actor, config)
   conn = Connection(interpreter)
   conn.connect(config.get('server', 'host'))
