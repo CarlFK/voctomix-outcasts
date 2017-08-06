@@ -81,16 +81,19 @@ class Interpreter(object):
     primary = False
     composite_mode = CompositeModes.fullscreen
 
-    def __init__(self, actor, config):
+    def __init__(self, actor, config, debug=False):
         self.config = config
         self.actor = actor
+        self.debug = debug
         actor.reset_led()
+        if self.debug:
+            print('LED has been reset to off')
 
     def compute_state(self):
         if self.composite_mode == CompositeModes.fullscreen:
-            actor.enable_tally(self.primary)
+            return self.primary
         else:
-            actor.enable_tally(self.a_or_b)
+            return self.a_or_b
 
     def handler(self, response):
         words = response.split()
@@ -102,7 +105,11 @@ class Interpreter(object):
             print('Ignoring signal', signal)
         else:
             handler(args)
-            interpreter.compute_state()
+            enable = interpreter.compute_state()
+            actor.enable_tally(enable)
+            if self.debug:
+                print('LED has been set to {}.'.format(
+                    'on' if enable else 'off'))
 
     def handle_video_status(self, cams):
         mycam = self.config.get('light', 'cam')
@@ -159,18 +166,15 @@ class RPiGPIODriver:
             GPIO.output(self.gpio_red, GPIO.HIGH)
 
 
-class DebugDriver:
+class DummyDriver:
     def __init__(self, config):
         pass
 
     def reset_led(self):
-        print('LED has been reset to off')
+        pass
 
     def enable_tally(self, enable):
-        if enable:
-            print('tally on!')
-        else:
-            print('tally off!')
+        pass
 
 
 class SerialDTRDriver:
@@ -202,15 +206,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
     config = Config(cmd_line_config=args.config)
     driver = config.get('light', 'driver')
-    if args.debug:
-        actor = DebugDriver(config)
+    if driver == 'dummy':
+        actor = DummyDriver(config)
     elif driver == 'rpi':
         actor = RPiGPIODriver(config)
     elif driver == 'serial':
         actor = SerialDTRDriver(config)
     else:
         raise Exception('Unknown driver: ' + driver)
-    interpreter = Interpreter(actor, config)
+    interpreter = Interpreter(actor, config, debug=args.debug)
     conn = Connection(interpreter)
     conn.connect(config.get('server', 'host'))
     conn.send('get_config')
