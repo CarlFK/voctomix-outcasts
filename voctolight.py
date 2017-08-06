@@ -63,7 +63,7 @@ class Connection(asyncio.Protocol):
         for line in lines:
             interpreter.handler(line)
 
-    def onnection_lost(self, exc):
+    def connection_lost(self, exc):
         print('server closed the connection')
         asyncio.get_event_loop().stop()
 
@@ -220,4 +220,8 @@ if __name__ == '__main__':
     conn.send('get_config')
     conn.send('get_composite_mode')
     conn.send('get_video')
-    conn.loop.run_forever()
+    try:
+        conn.loop.run_forever()
+    except KeyboardInterrupt:
+        print('Quitting (Ctrl-C)')
+    actor.reset_led()
