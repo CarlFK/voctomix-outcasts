@@ -31,7 +31,7 @@ class Config(configparser.ConfigParser, object):
     ]
 
     def __init__(self, cmd_line_config=None):
-        super(Config, self).__init__()
+        super().__init__()
         self.cmd_line_config = cmd_line_config
         self._read_config()
 
@@ -157,7 +157,7 @@ class LedActor:
             GPIO.output(gpio, GPIO.HIGH)
 
     def enable_tally(self, enable):
-        if enable == True:
+        if enable:
             GPIO.output(self.gpio_red, GPIO.LOW)
         else:
             GPIO.output(self.gpio_red, GPIO.HIGH)
@@ -171,7 +171,7 @@ class FakeLedActor:
         print('LED has been reset to off')
 
     def enable_tally(self, enable):
-        if enable == True:
+        if enable:
             print('tally on!')
         else:
             print('tally off!')
@@ -189,7 +189,7 @@ class SerialDTRActor:
         print('LED has been reset to off')
 
     def enable_tally(self, enable):
-        if enable == True:
+        if enable:
             self.fd = open(self.fn)
             print('tally on!')
         else:
