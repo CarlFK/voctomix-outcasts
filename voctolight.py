@@ -90,7 +90,7 @@ class Interpreter(object):
 
   def compute_state(self):
     if self.composite_mode == CompositeModes.fullscreen:
-      actor.enable_tally(self.a_or_b and self.primary)
+      actor.enable_tally(self.primary)
     else:   
       actor.enable_tally(self.a_or_b)
 
