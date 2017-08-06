@@ -61,7 +61,7 @@ class Connection(asyncio.Protocol):
 
     def send(self, message):
         self.transport.write(message.encode())
-        self.transport.write("\n".encode())
+        self.transport.write('\n'.encode())
 
     def connection_made(self, transport):
         self.transport = transport
@@ -108,7 +108,7 @@ class Interpreter(object):
         try:
             handler = getattr(self, 'handle_{}'.format(signal))
         except AttributeError:
-            print("Ignoring signal", signal)
+            print('Ignoring signal', signal)
         else:
             handler(args)
             interpreter.compute_state()
@@ -121,23 +121,23 @@ class Interpreter(object):
             self.a_or_b = False
 
         self.primary = (cams[0] == mycam)
-        # print ("Is primary?", self.primary)
+        # print ('Is primary?', self.primary)
 
     def handle_composite_mode(self, mode_list):
         mode = mode_list[0]
-        if mode == "fullscreen":
+        if mode == 'fullscreen':
             self.composite_mode = CompositeModes.fullscreen
-        elif mode == "side_by_side_equal":
+        elif mode == 'side_by_side_equal':
             self.composite_mode = CompositeModes.side_by_side_equal
-        elif mode == "side_by_side_preview":
+        elif mode == 'side_by_side_preview':
             self.composite_mode = CompositeModes.side_by_side_preview
-        elif mode == "picture_in_picture":
+        elif mode == 'picture_in_picture':
             self.composite_mode = CompositeModes.picture_in_picture
         else:
-            print("Cannot handle", mode, "of type", type(mode))
+            print('Cannot handle', mode, 'of type', type(mode))
 
     def handle_server_config(self, args):
-        server_config_json = " ".join(args)
+        server_config_json = ' '.join(args)
         server_config = json.loads(server_config_json)
         self.config.setup_with_server_config(server_config)
 
@@ -168,45 +168,45 @@ class FakeLedActor:
         pass
 
     def reset_led(self):
-        print("LED has been reset to off")
+        print('LED has been reset to off')
 
     def enable_tally(self, enable):
         if enable == True:
-            print("tally on!")
+            print('tally on!')
         else:
-            print("tally off!")
+            print('tally off!')
 
 
 class SerialDTRActor:
     def __init__(self, config):
         self.fn = config.get('light', 'port')
-        print("Using:", self.fn)
+        print('Using:', self.fn)
         self.fd = None
 
     def reset_led(self):
         if self.fd:
             self.fd.close()
-        print("LED has been reset to off")
+        print('LED has been reset to off')
 
     def enable_tally(self, enable):
         if enable == True:
             self.fd = open(self.fn)
-            print("tally on!")
+            print('tally on!')
         else:
             if self.fd:
                 self.fd.close()
             self.fd = None
-            print("tally off!")
+            print('tally off!')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Tallylight controlling daemon for voctomix.')
     parser.add_argument(
-        "--config", type=open, help="Use a specific config file")
+        '--config', type=open, help='Use a specific config file')
     parser.add_argument(
-        "--debug", action="store_true",
-        help="Show what would be done instead of toggling lights")
+        '--debug', action='store_true',
+        help='Show what would be done instead of toggling lights')
     args = parser.parse_args()
     config = Config(cmd_line_config=args.config)
     if args.debug:
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     interpreter = Interpreter(actor, config)
     conn = Connection(interpreter)
     conn.connect(config.get('server', 'host'))
-    conn.send("get_config")
-    conn.send("get_composite_mode")
-    conn.send("get_video")
+    conn.send('get_config')
+    conn.send('get_composite_mode')
+    conn.send('get_video')
     conn.loop.run_forever()
