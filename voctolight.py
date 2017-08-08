@@ -185,14 +185,13 @@ class SerialDTRDriver:
     def reset_led(self):
         if self.fd:
             self.fd.close()
+            self.fd = None
 
     def enable_tally(self, enable):
         if enable:
             self.fd = open(self.fn)
         else:
-            if self.fd:
-                self.fd.close()
-            self.fd = None
+            self.reset_led()
 
 
 if __name__ == '__main__':
