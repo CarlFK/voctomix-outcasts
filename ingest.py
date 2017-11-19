@@ -110,11 +110,12 @@ def mk_video_src(args, videocaps):
         video_src = """
             decklinkvideosrc {attribs} !
                 {monitor}
-        videoconvert !
+                videoconvert !
                 videorate !
                 videoscale !
             """
         # yadif !
+        # deinterlace
 
     elif args.video_source == 'png':
         video_src = """
