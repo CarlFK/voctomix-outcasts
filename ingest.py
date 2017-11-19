@@ -120,10 +120,8 @@ def mk_video_src(args, videocaps):
     elif args.video_source == 'png':
         video_src = """
             multifilesrc {attribs}
-                loop=0
                 caps="image/png" !
             pngdec !
-            imagefreeze !
             videoscale !
                 {monitor}
             videoconvert !
