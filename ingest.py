@@ -127,6 +127,15 @@ def mk_video_src(args, videocaps):
             videoconvert !
             """
 
+    elif args.video_source == 'file':
+        video_src = """
+            multifilesrc {attribs} !
+            decodebin !
+            videoscale !
+                {monitor}
+            videoconvert !
+            """
+
     elif args.video_source == 'test':
 
         # things to render as text ontop of test video
@@ -356,7 +365,7 @@ def get_args():
         '--video-source', action='store',
         choices=[
             'dv', 'hdv', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'test'],
+            'ximage', 'png', 'file', 'test'],
         default='test',
         help="Where to get video from")
 
