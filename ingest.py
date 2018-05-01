@@ -81,6 +81,17 @@ def mk_video_src(args, videocaps):
         videoconvert !
             """
 
+    elif args.video_source == 'temp':
+        video_src = """
+            v4l2src {attribs} name=videosrc !
+                queue max-size-time=4000000000 !
+                {monitor}
+                videoconvert !
+                videoscale !
+                videorate !
+            """
+
+
     elif args.video_source == 'hdmi2usb':
         # https://hdmi2usb.tv
         # Note: this code works with 720p
