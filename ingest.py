@@ -367,7 +367,7 @@ def get_args():
         '--video-source', action='store',
         choices=[
             'dv', 'hdv', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'test'],
+            'ximage', 'png', 'test', 'temp'],
         default='test',
         help="Where to get video from")
 
