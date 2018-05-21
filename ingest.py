@@ -55,6 +55,20 @@ def mk_video_src(args, videocaps):
     else:
         d['monitor'] = ""
 
+    if args.video_source == 'udp':
+        video_src = """
+            udpsrc name=videosrc {attribs} !
+                tsdemux name=demux !
+                queue max-size-time=4000000000 !
+                h264parse !
+                avdec_h264 !
+            {monitor}
+        videoconvert !
+        videorate !
+        videoscale !
+            """
+
+
     if args.video_source == 'dv':
         video_src = """
             dv1394src name=videosrc {attribs} !
@@ -134,8 +148,8 @@ def mk_video_src(args, videocaps):
         d['videocaps'] = videocaps
 
         video_src = """
-videotestsrc name=videosrc {attribs} !
-    clockoverlay
+    videotestsrc name=videosrc {attribs} !
+      clockoverlay
         text="Source:{hostname}\nCaps:{videocaps}\nAttribs:{attribs}\n"
         halignment=left line-alignment=left !
     {monitor}
@@ -155,7 +169,8 @@ def mk_audio_src(args, audiocaps):
         'base_audio_attribs': 'provide-clock=false slave-method=re-timestamp'
     }
 
-    if args.audio_source in ['dv', 'hdv']:
+
+    if args.audio_source in ['dv', 'hdv', 'udp']:
         # this only works if video is from DV also.
         # or some gst source that gets demux ed
         audio_src = """
@@ -355,7 +370,7 @@ def get_args():
     parser.add_argument(
         '--video-source', action='store',
         choices=[
-            'dv', 'hdv', 'hdmi2usb', 'blackmagic',
+            'dv', 'hdv', 'udp', 'hdmi2usb', 'blackmagic',
             'ximage', 'png', 'test'],
         default='test',
         help="Where to get video from")
@@ -372,7 +387,8 @@ def get_args():
 
     parser.add_argument(
         '--audio-source', action='store',
-        choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'],
+        choices=['dv', 'hdv', 'udp',
+            'alsa', 'pulse', 'blackmagic', 'test'],
         default='test',
         help="Where to get audio from")
 
