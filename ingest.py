@@ -170,7 +170,7 @@ def mk_audio_src(args, audiocaps):
     }
 
 
-    if args.audio_source in ['dv', 'hdv', 'udp']:
+    if args.audio_source in ['dv', 'hdv']:
         # this only works if video is from DV also.
         # or some gst source that gets demux ed
         audio_src = """
@@ -178,6 +178,20 @@ def mk_audio_src(args, audiocaps):
                 queue !
                 audioconvert !
                 """
+
+    if args.audio_source == 'udp':
+        # this only works if video is from udp also.
+        # or some gst source that gets demux ed
+        # and needs to be decoded?  maybe.  it's magic.
+        audio_src = """
+            demux.audio !
+                mpegaudioparse ! \
+                avdec_mp2float !\
+                audioconvert !\
+                audioresample !\
+                audiorate !\
+                queue !
+            """
 
     elif args.audio_source == 'pulse':
         audio_src = """
