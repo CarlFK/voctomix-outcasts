@@ -185,6 +185,7 @@ def mk_audio_src(args, audiocaps):
         # and needs to be decoded?  maybe.  it's magic.
         audio_src = """
             demux. !
+                queue !
                 mpegaudioparse !
                 avdec_mp2float !
                 audioconvert !
