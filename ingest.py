@@ -184,7 +184,7 @@ def mk_audio_src(args, audiocaps):
         # or some gst source that gets demux ed
         # and needs to be decoded?  maybe.  it's magic.
         audio_src = """
-            demux.audio !
+            demux.!
                 mpegaudioparse ! \
                 avdec_mp2float !\
                 audioconvert !\
