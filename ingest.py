@@ -55,7 +55,7 @@ def mk_video_src(args, videocaps):
     else:
         d['monitor'] = ""
 
-    if args.video_source == 'udp':
+    if args.video_source == 'udp_h264':
         video_src = """
             udpsrc name=videosrc {attribs} !
                 tsdemux name=demux !
@@ -179,7 +179,7 @@ def mk_audio_src(args, audiocaps):
                 audioconvert !
                 """
 
-    if args.audio_source == 'udp':
+    if args.audio_source == 'udp_mp2':
         # this only works if video is from udp also.
         # or some gst source that gets demux ed
         # and needs to be decoded?  maybe.  it's magic.
@@ -384,7 +384,7 @@ def get_args():
     parser.add_argument(
         '--video-source', action='store',
         choices=[
-            'dv', 'hdv', 'udp', 'hdmi2usb', 'blackmagic',
+            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
             'ximage', 'png', 'test'],
         default='test',
         help="Where to get video from")
@@ -401,7 +401,7 @@ def get_args():
 
     parser.add_argument(
         '--audio-source', action='store',
-        choices=['dv', 'hdv', 'udp',
+        choices=['dv', 'hdv', 'udp_mp2',
             'alsa', 'pulse', 'blackmagic', 'test'],
         default='test',
         help="Where to get audio from")
