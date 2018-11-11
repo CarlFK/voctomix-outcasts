@@ -109,6 +109,20 @@ def mk_video_src(args, videocaps):
                 videorate !
             """
 
+    elif args.video_source == 'easycap':
+        # EasyCAP usb video capture
+        video_src = """
+            v4l2src {attribs} name=videosrc !
+                queue max-size-time=4000000000 !
+        image/jpeg,width=720,height=480 !
+                jpegdec !
+                {monitor}
+        deinterlace mode=1 !
+                videoconvert !
+                videoscale !
+                videorate !
+            """
+
     elif args.video_source == 'ximage':
         video_src = """
             ximagesrc {attribs} name=videosrc
