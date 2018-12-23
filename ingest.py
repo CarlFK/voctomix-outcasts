@@ -41,7 +41,10 @@ from lib.connection import Connection
 def mk_video_src(args, videocaps):
     # make video source part of pipeline
 
-    d = {'attribs': args.video_attribs}
+    d = {
+            'attribs': args.video_attribs,
+            'videocaps': videocaps,
+            }
 
     if args.monitor:
         if args.debug:
@@ -131,7 +134,6 @@ def mk_video_src(args, videocaps):
 
         # things to render as text ontop of test video
         d['hostname'] = socket.gethostname()
-        d['videocaps'] = videocaps
 
         video_src = """
 videotestsrc name=videosrc {attribs} !
@@ -141,9 +143,22 @@ videotestsrc name=videosrc {attribs} !
     {monitor}
             """
 
+    elif args.video_source == 'bop':
+        video_src = """
+      beep_t. ! queue !
+    spacescope shader=none style=lines {attribs} !
+    {monitor}
+        videoconvert !
+        {videocaps} !
+        queue !
+            """
+
+    if "{videocaps}" not in video_src:
+        # bop needs caps in the middle, rest append to the end.
+        video_src += "{videocaps} !\n"
+
     video_src = video_src.format(**d)
 
-    video_src += videocaps + "!\n"
 
     return video_src
 
@@ -152,7 +167,9 @@ def mk_audio_src(args, audiocaps):
 
     d = {
         'attribs': args.audio_attribs,
-        'base_audio_attribs': 'provide-clock=false slave-method=re-timestamp'
+        'base_audio_attribs':
+            'provide-clock=false slave-method=re-timestamp',
+        'audiocaps': audiocaps,
     }
 
     if args.audio_source in ['dv', 'hdv']:
@@ -183,11 +200,24 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'test':
         audio_src = """
-            audiotestsrc {attribs} name=audiosrc freq=330 !
+            audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
             """
+
+    elif args.audio_source == 'beep':
+        audio_src = """
+    audiotestsrc wave=ticks {attribs} name=audiosrc !
+       {audiocaps} !
+    tee name=beep_t
+      beep_t. ! queue !
+      """
+
+    if "{audiocaps}" not in audio_src:
+        # beep needs audiocaps in the middle,
+        # the rest can be appened here:
+        audio_src += "{audiocaps} !\n"
+
     audio_src = audio_src.format(**d)
 
-    audio_src += audiocaps + "!\n"
 
     return audio_src
 
@@ -202,19 +232,26 @@ def mk_client(core_ip, port):
 
 def mk_pipeline(args, server_caps, core_ip):
 
-    video_src = mk_video_src(args, server_caps['videocaps'])
-    audio_src = mk_audio_src(args, server_caps['audiocaps'])
+    if args.src:
+        src = args.src.format(**server_caps)
+
+    else:
+        video_src = mk_video_src(args, server_caps['videocaps'])
+        audio_src = mk_audio_src(args, server_caps['audiocaps'])
+        src =  """
+            {video_src}
+             mux.
+            {audio_src}
+             mux.
+            matroskamux name=mux !
+        """.format(video_src=video_src, audio_src=audio_src)
 
     client = mk_client(core_ip, args.port)
 
     pipeline = """
-    {video_src}
-     mux.
-    {audio_src}
-     mux.
-            matroskamux name=mux !
+            {src}
     {client}
-    """.format(video_src=video_src, audio_src=audio_src, client=client)
+    """.format(src=src, client=client)
 
     # remove blank lines to make it more human readable
     while "\n\n" in pipeline:
@@ -353,10 +390,14 @@ def get_args():
             help="get config from server using this id.")
 
     parser.add_argument(
+        '--src', action='store', default='',
+        help="gst source pipeline")
+
+    parser.add_argument(
         '--video-source', action='store',
         choices=[
-            'dv', 'hdv', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'test'],
+            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
+            'ximage', 'png', 'test', 'bop'],
         default='test',
         help="Where to get video from")
 
@@ -372,7 +413,8 @@ def get_args():
 
     parser.add_argument(
         '--audio-source', action='store',
-        choices=['dv', 'alsa', 'pulse', 'blackmagic', 'test'],
+        choices=['dv', 'hdv', 'udp_mp2',
+            'alsa', 'pulse', 'blackmagic', 'test', 'beep'],
         default='test',
         help="Where to get audio from")
 
