@@ -143,19 +143,18 @@ videotestsrc name=videosrc {attribs} !
     {monitor}
             """
 
-    elif args.video_source == 'bop':
+    elif args.video_source == 'spacescope':
+        # Stereo visualizer
+        # pair up with test beep for a handy AV sync test.
         video_src = """
-      beep_t. ! queue !
+      audio_tee. ! queue !
     spacescope shader=none style=lines {attribs} !
     {monitor}
-        videoconvert !
-        {videocaps} !
-        queue !
+    videoconvert !
+    queue !
             """
 
-    if "{videocaps}" not in video_src:
-        # bop needs caps in the middle, rest append to the end.
-        video_src += "{videocaps} !\n"
+    video_src += "{videocaps} !\n"
 
     video_src = video_src.format(**d)
 
@@ -203,21 +202,12 @@ def mk_audio_src(args, audiocaps):
             audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
             """
 
-    elif args.audio_source == 'beep':
-        audio_src = """
-    audiotestsrc wave=ticks {attribs} name=audiosrc !
+    audio_src += """
        {audiocaps} !
-    tee name=beep_t
-      beep_t. ! queue !
+    tee name=audio_tee
+      audio_tee. ! queue !
       """
-
-    if "{audiocaps}" not in audio_src:
-        # beep needs audiocaps in the middle,
-        # the rest can be appened here:
-        audio_src += "{audiocaps} !\n"
-
     audio_src = audio_src.format(**d)
-
 
     return audio_src
 
@@ -262,7 +252,7 @@ def mk_pipeline(args, server_caps, core_ip):
     if args.debug:
         gst_cmd = "gst-launch-1.0 {}".format(pipeline)
 
-        # escape the ! because
+        # escape the ! because bash
         # asl2: ! is interpreted as a command history metacharacter
         gst_cmd = gst_cmd.replace("!", " \! ")
 
@@ -397,7 +387,7 @@ def get_args():
         '--video-source', action='store',
         choices=[
             'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'test', 'bop'],
+            'ximage', 'png', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
 
@@ -414,7 +404,7 @@ def get_args():
     parser.add_argument(
         '--audio-source', action='store',
         choices=['dv', 'hdv', 'udp_mp2',
-            'alsa', 'pulse', 'blackmagic', 'test', 'beep'],
+            'alsa', 'pulse', 'blackmagic', 'test', ],
         default='test',
         help="Where to get audio from")
 
