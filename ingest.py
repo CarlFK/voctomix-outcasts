@@ -130,6 +130,15 @@ def mk_video_src(args, videocaps):
             videoconvert !
             """
 
+    elif args.video_source == 'file':
+        video_src = """
+            multifilesrc {attribs} !
+            decodebin !
+            videoscale !
+                {monitor}
+            videoconvert !
+            """
+
     elif args.video_source == 'test':
 
         # things to render as text ontop of test video
