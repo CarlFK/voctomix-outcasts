@@ -65,7 +65,7 @@ def mk_video_src(args, videocaps):
         queue max-size-time=4000000000 !
         dvdec !
                 {monitor}
-        deinterlace mode=1 !
+        deinterlace mode=interlaced !
         videoconvert !
         videorate !
         videoscale !
@@ -78,7 +78,7 @@ def mk_video_src(args, videocaps):
         queue max-size-time=4000000000 !
         decodebin !
                 {monitor}
-        deinterlace mode=1 !
+        deinterlace mode=interlaced !
         videorate !
         videoscale !
         videoconvert !
@@ -99,6 +99,7 @@ def mk_video_src(args, videocaps):
             """
 
     elif args.video_source == 'ximage':
+        # startx=0 starty=0 endx=1919 endy=1079 !
         video_src = """
             ximagesrc {attribs} name=videosrc
                    use-damage=false !
@@ -107,7 +108,6 @@ def mk_video_src(args, videocaps):
                 videorate !
                 videoscale !
             """
-        # startx=0 starty=0 endx=1919 endy=1079 !
 
     elif args.video_source == 'blackmagic':
         video_src = """
@@ -133,10 +133,14 @@ def mk_video_src(args, videocaps):
     elif args.video_source == 'file':
         video_src = """
             multifilesrc {attribs} !
-            decodebin !
-            videoscale !
+            decodebin name=src
+            src. !
                 {monitor}
+            queue !
+            deinterlace mode=interlaced !
             videoconvert !
+            videoscale !
+            videorate !
             """
 
     elif args.video_source == 'test':
@@ -188,6 +192,18 @@ def mk_audio_src(args, audiocaps):
                 queue !
                 audioconvert !
                 """
+
+    elif args.audio_source == 'file':
+        # this only works if video is from DV also.
+        # or some gst source that gets demux ed
+        audio_src = """
+        src. !
+                queue !
+                audioconvert !
+                audioresample !
+                audiorate !
+                """
+
 
     elif args.audio_source == 'pulse':
         audio_src = """
@@ -396,7 +412,7 @@ def get_args():
         '--video-source', action='store',
         choices=[
             'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'test', 'spacescope'],
+            'ximage', 'png', 'file', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
 
@@ -412,7 +428,7 @@ def get_args():
 
     parser.add_argument(
         '--audio-source', action='store',
-        choices=['dv', 'hdv', 'udp_mp2',
+        choices=['dv', 'hdv', 'file',
             'alsa', 'pulse', 'blackmagic', 'test', ],
         default='test',
         help="Where to get audio from")
