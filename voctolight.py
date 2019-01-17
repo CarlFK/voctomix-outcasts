@@ -2,43 +2,14 @@
 # Based upon:
 # https://github.com/voc/voctomix/tree/voctopanel/example-scripts/voctolight
 
-from enum import Enum
-import argparse
+from argparse import ArgumentParser, FileType
 import asyncio
-import configparser
+from enum import Enum
 import json
-import os.path
+from sys import exit
 
-
-class Config(configparser.ConfigParser, object):
-    config_files = [
-        os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                     'default-config.ini'),
-        os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                     'config.ini'),
-        '/etc/voctomix/voctolight.ini',
-        '/etc/voctolight.ini',
-        os.path.expanduser('~/.voctolight.ini'),
-    ]
-
-    def __init__(self, cmd_line_config=None):
-        super().__init__()
-        self.cmd_line_config = cmd_line_config
-        self._read_config()
-
-    def _read_config(self):
-        self.read(self.config_files)
-        if self.cmd_line_config:
-            self.read_file(self.cmd_line_config)
-            self.cmd_line_config.seek(0)
-
-    def setup_with_server_config(self, server_config):
-        self.clear()
-        self._read_config()
-        self.read_dict(server_config)
-
-    def getlist(self, section, option):
-        return [x.strip() for x in self.get(section, option).split(',')]
+from lib.config import Config
+from lib.plugins.all_plugins import PLUGINS
 
 
 class Connection(asyncio.Protocol):
@@ -85,7 +56,7 @@ class Interpreter(object):
         self.config = config
         self.actor = actor
         self.debug = debug
-        actor.reset_led()
+        actor.tally_off()
         if self.debug:
             print('LED has been reset to off')
 
@@ -105,11 +76,12 @@ class Interpreter(object):
             print('Ignoring signal', signal)
         else:
             handler(args)
-            enable = interpreter.compute_state()
-            actor.enable_tally(enable)
-            if self.debug:
-                print('LED has been set to {}.'.format(
-                    'on' if enable else 'off'))
+            if interpreter.compute_state():
+              print('LED has been switched on')
+              actor.tally_on()
+            else:
+              print('LED has been switched off')
+              actor.tally_off()
 
     def handle_video_status(self, cams):
         mycam = self.config.get('light', 'cam')
@@ -140,79 +112,22 @@ class Interpreter(object):
         self.config.setup_with_server_config(server_config)
 
 
-class RPiGPIODriver:
-    def __init__(self, config):
-        self._import()
-        self.gpios = config.get('light', 'gpios').split(',')
-        self.gpio_red = int(config.get('light', 'gpio_red'))
-        self.reset_led()
-
-    def _import(self):
-        global GPIO
-        import RPi.GPIO as GPIO
-
-    def reset_led(self):
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setwarnings(False)
-        for gpio in self.gpios:
-            gpio = int(gpio)
-            GPIO.setup(gpio, GPIO.OUT)
-            GPIO.output(gpio, GPIO.HIGH)
-
-    def enable_tally(self, enable):
-        if enable:
-            GPIO.output(self.gpio_red, GPIO.LOW)
-        else:
-            GPIO.output(self.gpio_red, GPIO.HIGH)
-
-
-class DummyDriver:
-    def __init__(self, config):
-        pass
-
-    def reset_led(self):
-        pass
-
-    def enable_tally(self, enable):
-        pass
-
-
-class SerialDTRDriver:
-    def __init__(self, config):
-        self.fn = config.get('light', 'port')
-        self.fd = None
-
-    def reset_led(self):
-        if self.fd:
-            self.fd.close()
-            self.fd = None
-
-    def enable_tally(self, enable):
-        if enable:
-            self.fd = open(self.fn)
-        else:
-            self.reset_led()
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description='Tallylight controlling daemon for voctomix.')
     parser.add_argument(
-        '--config', type=open, help='Use a specific config file')
+        '-c', '--config', type=FileType('r'), help='Use a specific config file')
     parser.add_argument(
-        '--debug', action='store_true',
-        help='Show what would be done instead of toggling lights')
+        '-d', '--debug', action='store_true',
+        help='Show what would be done in addition to toggling lights')
     args = parser.parse_args()
     config = Config(cmd_line_config=args.config)
-    driver = config.get('light', 'driver')
-    if driver == 'dummy':
-        actor = DummyDriver(config)
-    elif driver == 'rpi':
-        actor = RPiGPIODriver(config)
-    elif driver == 'serial':
-        actor = SerialDTRDriver(config)
-    else:
-        raise Exception('Unknown driver: ' + driver)
+    plugin_cls = PLUGINS.get(config.get('light', 'plugin'), None)
+    if plugin_cls is None:
+        print('No plugin selected, control will not work!')
+        exit(1)
+
+    actor = plugin_cls(config)
     interpreter = Interpreter(actor, config, debug=args.debug)
     conn = Connection(interpreter)
     conn.connect(config.get('server', 'host'))
