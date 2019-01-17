@@ -19,7 +19,7 @@ import socket
 
 log = logging.getLogger('Connection')
 
-
+# TODO: Replace with asyncio
 class Connection(object):
     def __init__(self, host, port=9999):
         self.host = host
