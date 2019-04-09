@@ -194,8 +194,8 @@ def mk_audio_src(args, audiocaps):
                 """
 
     elif args.audio_source == 'file':
-        # this only works if video is from DV also.
-        # or some gst source that gets demux ed
+        # this only works if video is from ...
+        # some gst source that gets demux ed, I guess.
         audio_src = """
         src. !
                 queue !
@@ -275,6 +275,7 @@ def mk_pipeline(args, server_caps, core_ip):
     print(pipeline)
 
     if args.debug:
+        # print something to run in a shell
         gst_cmd = "gst-launch-1.0 {}".format(pipeline)
 
         # escape the ! because bash
@@ -342,7 +343,7 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
 
     def on_eos(bus, message):
         print('Received EOS-Signal')
-        sys.exit(1)
+        sys.exit(0)
 
     def on_error(bus, message):
         print('Received Error-Signal')
