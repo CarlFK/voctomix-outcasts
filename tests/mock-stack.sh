@@ -3,10 +3,14 @@
 # core server
 gst-launch-1.0 \
     tcpserversrc host=127.0.0.1 port=4953 ! \
-    queue ! \
+    queue ! matroskaparse ! \
     tcpserversink host=127.0.0.1 port=4954  \
 & srv=$!
 sleep 1
+function finish {
+  kill $srv 2> /dev/null
+}
+trap finish EXIT
 
 # test source client
 gst-launch-1.0 \
@@ -35,7 +39,4 @@ gst-launch-1.0 \
 		queue !\
 		mux. \
 	mpegtsmux name=mux !\
-		filesink location="/tmp/test.ts" \
-
-kill $srv
-
+		filesink location="/tmp/test.ts"

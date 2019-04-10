@@ -7,13 +7,19 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-# $1 - destination dir. default: ~/Videos 
+# $1 - destination dir. default: ~/Videos
 # files will be $dest_dir/$date/$time.gs.ts
 # (.gs to keep these apart from the files created by record-timestamp.sh)
+
+# NB: does not chunk files.  keeps saving untill the process is killed.
+
+# TODO: https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-good/html/gst-plugins-good-plugins-splitmuxsink.html
+
+# splitmuxsink — Muxer wrapper for splitting output stream by size or time
 
 dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
 

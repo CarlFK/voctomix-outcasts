@@ -151,7 +151,7 @@ def mk_video_src(args, videocaps):
         video_src = """
 videotestsrc name=videosrc {attribs} !
     clockoverlay
-        text="Source:{hostname}\nCaps:{videocaps}\nAttribs:{attribs}\n"
+        text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
         halignment=left line-alignment=left !
     {monitor}
             """
