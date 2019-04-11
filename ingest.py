@@ -353,7 +353,8 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
 
     print('starting pipeline...')
     senderPipeline = Gst.parse_launch(pipeline)
-    senderPipeline.use_clock(clock)
+    if clock is not None:
+        senderPipeline.use_clock(clock)
 
     # Delay video/audio if required
     NS_TO_MS = 100000
@@ -460,6 +461,10 @@ def get_args():
         help="port of vocto core")
 
     parser.add_argument(
+        '--no-clock', action='store_true',
+        help="Don't use core's clock. (danger)")
+
+    parser.add_argument(
         '--debug', action='store_true',
         help="debugging things, like dump a  gst-launch-1.0 command")
 
@@ -479,7 +484,10 @@ def main():
 
     pipeline = mk_pipeline(args, server_caps, core_ip)
 
-    clock = get_clock(core_ip)
+    if args.no_clock:
+        clock = None
+    else:
+        clock = get_clock(core_ip)
 
     run_pipeline(pipeline, clock, args.audio_delay, args.video_delay)
 
