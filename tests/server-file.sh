@@ -17,7 +17,7 @@ gst-launch-1.0 \
 		queue !\
 		mux. \
 	mpegtsmux name=mux !\
-		filesink location="/tmp/test.ts" \
+		filesink location="$(mktemp --suffix=.ts)"
 
 exit
 
