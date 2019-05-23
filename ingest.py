@@ -40,23 +40,8 @@ from lib.connection import Connection
 
 def mk_video_src(args, videocaps):
     # make video source part of pipeline
-
-    d = {
-            'attribs': args.video_attribs,
-            'videocaps': videocaps,
-            }
-
-    if args.monitor:
-        if args.debug:
-            d['monitor'] = """tee name=t ! queue !
-                    videoconvert ! fpsdisplaysink sync=false
-                    t. ! queue !"""
-        else:
-            d['monitor'] = """tee name=t ! queue !
-                    videoconvert ! autovideosink sync=false
-                    t. ! queue !"""
-    else:
-        d['monitor'] = ""
+    # args come from command line
+    # videocaps come from voctocore
 
     if args.video_source == 'dv':
         video_src = """
@@ -64,11 +49,6 @@ def mk_video_src(args, videocaps):
         dvdemux name=demux !
         queue max-size-time=4000000000 !
         dvdec !
-                {monitor}
-        deinterlace mode=interlaced !
-        videoconvert !
-        videorate !
-        videoscale !
             """
 
     elif args.video_source == 'hdv':
@@ -77,11 +57,6 @@ def mk_video_src(args, videocaps):
         tsdemux !
         queue max-size-time=4000000000 !
         decodebin !
-                {monitor}
-        deinterlace mode=interlaced !
-        videorate !
-        videoscale !
-        videoconvert !
             """
 
     elif args.video_source == 'hdmi2usb':
@@ -92,10 +67,6 @@ def mk_video_src(args, videocaps):
                 queue max-size-time=4000000000 !
         image/jpeg,width=1280,height=720 !
                 jpegdec !
-                {monitor}
-                videoconvert !
-                videoscale !
-                videorate !
             """
 
     elif args.video_source == 'ximage':
@@ -103,19 +74,11 @@ def mk_video_src(args, videocaps):
         video_src = """
             ximagesrc {attribs} name=videosrc
                    use-damage=false !
-                {monitor}
-        videoconvert !
-                videorate !
-                videoscale !
             """
 
     elif args.video_source == 'blackmagic':
         video_src = """
             decklinkvideosrc {attribs} !
-                {monitor}
-                videoconvert !
-                videorate !
-                videoscale !
             """
         # yadif !
         # deinterlace
@@ -125,9 +88,6 @@ def mk_video_src(args, videocaps):
             multifilesrc {attribs}
                 caps="image/png" !
             pngdec !
-            videoscale !
-                {monitor}
-            videoconvert !
             """
 
     elif args.video_source == 'file':
@@ -135,26 +95,22 @@ def mk_video_src(args, videocaps):
             multifilesrc {attribs} !
             decodebin name=src
             src. !
-                {monitor}
             queue !
-            deinterlace mode=interlaced !
-            videoconvert !
-            videoscale !
-            videorate !
             """
 
     elif args.video_source == 'test':
 
-        # things to render as text ontop of test video
-        d['hostname'] = socket.gethostname()
-
         video_src = """
-videotestsrc name=videosrc {attribs} !
+    videotestsrc name=videosrc {attribs} !
+    """
+        # things to render as text ontop of test video
+        video_src += """
     clockoverlay
         text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
         halignment=left line-alignment=left !
-    {monitor}
-            """
+            """.format(hostname=socket.gethostname(),
+                    videocaps=videocaps,
+                    attribs=args.video_attribs)
 
     elif args.video_source == 'spacescope':
         # Stereo visualizer
@@ -162,15 +118,26 @@ videotestsrc name=videosrc {attribs} !
         video_src = """
       audio_tee. ! queue !
     spacescope shader=none style=lines {attribs} !
-    {monitor}
-    videoconvert !
-    queue !
-            """
+           """
 
-    video_src += "{videocaps} !\n"
+    if args.monitor:
+        if args.debug:
+            videosink="fpsdisplaysink"
+        else:
+            videosink="autovideosink"
 
-    video_src = video_src.format(**d)
+        video_src += """
+            tee name=t ! queue !
+                    videoconvert ! {videosink} sync=false
+                    t. ! queue !
+            """.format(videosink=videosink)
 
+    if args.video_elements:
+        video_src += args.video_elements + " !\n"
+
+    video_src += videocaps + " !\n"
+
+    video_src = video_src.format(attribs=args.video_attribs)
 
     return video_src
 
@@ -190,7 +157,6 @@ def mk_audio_src(args, audiocaps):
         audio_src = """
             demux.audio !
                 queue !
-                audioconvert !
                 """
 
     elif args.audio_source == 'file':
@@ -199,9 +165,6 @@ def mk_audio_src(args, audiocaps):
         audio_src = """
         src. !
                 queue !
-                audioconvert !
-                audioresample !
-                audiorate !
                 """
 
 
@@ -429,6 +392,11 @@ def get_args():
         help="delay video by this many milliseconds")
 
     parser.add_argument(
+        '--video-elements', action='store',
+        default='videoconvert ! videorate ! videoscale',
+        help="gst video elments ! after src")
+
+    parser.add_argument(
         '--audio-source', action='store',
         choices=['dv', 'hdv', 'file',
             'alsa', 'pulse', 'blackmagic', 'test', ],
@@ -447,8 +415,13 @@ def get_args():
         help="delay audio by this many milliseconds")
 
     parser.add_argument(
+        '--audio-elements', action='store',
+        default="audioconvert ! audioresample ! audiorate",
+        help="gst audio elments ! after src")
+
+    parser.add_argument(
         '-m', '--monitor', action='store_true',
-        help="fps display sink")
+        help="local display sink")
 
     parser.add_argument(
         '--host', action='store',
