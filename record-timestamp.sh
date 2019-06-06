@@ -28,9 +28,9 @@ segment_time=1800  # 30 min
 mkdir -p $dest_dir/$(date +%Y-%m-%d)
 
 ffmpeg \
-    -nostdin \
-    -nostats -y -analyzeduration 10000 \
-    -thread_queue_size 512
+    -nostdin -y \
+    -analyzeduration 10000 \
+    -thread_queue_size 512 \
     -i tcp://localhost:11000?timeout=3000 \
     -aspect 16:9 \
     -map 0:v -c:v:0 mpeg2video -pix_fmt:v:0 yuv420p -qscale:v:0 4 -qmin:v:0 4 -qmax:v:0 4 -keyint_min:v:0 5 -bf:v:0 0 -g:v:0 5 -me_method:v:0 dia \
