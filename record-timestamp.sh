@@ -31,7 +31,7 @@ ffmpeg \
     -nostdin -y \
     -analyzeduration 10000 \
     -thread_queue_size 512 \
-    -i tcp://localhost:11000?timeout=3000 \
+    -i tcp://localhost:11000?timeout=3000000 \
     -aspect 16:9 \
     -map 0:v -c:v:0 mpeg2video -pix_fmt:v:0 yuv420p -qscale:v:0 4 -qmin:v:0 4 -qmax:v:0 4 -keyint_min:v:0 5 -bf:v:0 0 -g:v:0 5 -me_method:v:0 dia \
     -map 0:a -c:a mp2 -b:a 384k -ac:a 2 -ar:a 48000 \
