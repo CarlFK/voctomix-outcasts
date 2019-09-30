@@ -33,7 +33,7 @@ import sys
 import gi
 gi.require_version('Gst', '1.0')
 gi.require_version('GstNet', '1.0')
-from gi.repository import Gst, GstNet, GObject
+from gi.repository import Gst, GstNet, GObject, GLib
 
 from lib.connection import Connection
 
@@ -342,7 +342,7 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
     print("playing...")
     senderPipeline.set_state(Gst.State.PLAYING)
 
-    mainloop = gLib.MainLoop()
+    mainloop = GLib.MainLoop()
     try:
         mainloop.run()
     except KeyboardInterrupt:
