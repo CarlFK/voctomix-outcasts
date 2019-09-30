@@ -342,7 +342,7 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
     print("playing...")
     senderPipeline.set_state(Gst.State.PLAYING)
 
-    mainloop = GObject.MainLoop()
+    mainloop = gLib.MainLoop()
     try:
         mainloop.run()
     except KeyboardInterrupt:
