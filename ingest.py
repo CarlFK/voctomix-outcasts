@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 ingest.py: source client for Voctomix.
 
-   Copyright: 2015,2016,2017 Carl F. Karsten <carl@nextdayvideo.com>,
-                             Ryan Verner <ryan@nextdayvideo.com.au>
+   Copyright: 2015-2020 Carl F. Karsten <carl@nextdayvideo.com>,
+                        Ryan Verner <ryan@nextdayvideo.com.au>
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to
@@ -78,7 +78,8 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'blackmagic':
         video_src = """
-            decklinkvideosrc {attribs} !
+            decklinkvideosrc {attribs} name=videosrc !
+            queue max-size-time=4000000000 max-size-bytes=209715200 !
             """
         # yadif !
         # deinterlace
@@ -182,7 +183,8 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'blackmagic':
         audio_src = """
-            decklinkaudiosrc {attribs} !
+            decklinkaudiosrc name=audiosrc {attribs} !
+            queue max-size-time=4000000000 !
             """
 
     elif args.audio_source == 'test':
