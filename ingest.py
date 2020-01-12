@@ -167,7 +167,6 @@ def mk_audio_src(args, audiocaps):
                 queue !
                 """
 
-
     elif args.audio_source == 'pulse':
         audio_src = """
                 pulsesrc {attribs} {base_audio_attribs} name=audiosrc !
@@ -189,6 +188,9 @@ def mk_audio_src(args, audiocaps):
         audio_src = """
             audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
             """
+
+    if args.audio_elements:
+        audio_src += args.audio_elements + " !\n"
 
     audio_src += """
        {audiocaps} !
