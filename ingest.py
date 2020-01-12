@@ -78,7 +78,7 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'blackmagic':
         video_src = """
-            decklinkvideosrc {attribs} !
+            decklinkvideosrc name=videosrc {attribs} !
             """
         # yadif !
         # deinterlace
@@ -181,7 +181,7 @@ def mk_audio_src(args, audiocaps):
 
     elif args.audio_source == 'blackmagic':
         audio_src = """
-            decklinkaudiosrc {attribs} !
+            decklinkaudiosrc name=audiosrc {attribs} !
             """
 
     elif args.audio_source == 'test':
