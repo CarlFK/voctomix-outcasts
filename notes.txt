@@ -1,0 +1,23 @@
+--src examples
+
+same as voctomix-ingest (test sources):
+
+voctomix-ingest --src "videotestsrc name=videosrc ! videoconvert ! videorate ! videoscale ! video/x-raw,format=I420,width=1280,height=720,framerate=30/1,pixel-aspect-ratio=1/1 ! mux. audiotestsrc wave=ticks freq=330 name=audiosrc ! audio/x-raw,format=S16LE,channels=2,layout=interleaved,rate=48000 ! tee name=audio_tee audio_tee.! queue ! mux. matroskamux name=mux !"
+
+some webcam:
+--src "v4l2src ! queue ! videoconvert ! videorate ! videoscale ! {videocaps} ! mux. audiotestsrc wave=ticks freq=330 ! {audiocaps} ! queue ! matroskamux name=mux !"
+
+if --monoitor throws
+ERROR: from element /GstPipeline:pipeline0/GstAutoVideoSink:autovideosink0/GstVaapiSink:autovideosink0-actual-sink-vaapi: Internal error: could not render surface
+vaapi/gstvaapisink.c(1467): gst_vaapisink_show_frame_unlocked (): /GstPipeline:pipeline0/GstAutoVideoSink:autovideosink0/GstVaapiSink:autovideosink0-actual-sink-vaapi
+
+
+--monitor --debug shows:
+
+ tee name=t \! queue \! videoconvert \! fpsdisplaysink sync=false t.
+
+# add vaapipostproc before the videosink:
+vaapipostproc ! autovideosink
+# retult:
+voctomix-ingest --src "videotestsrc name=videosrc ! tee name=t \! queue \! videoconvert \! fpsdisplaysink sync=false t. ! videoconvert ! videorate ! videoscale ! video/x-raw,format=I420,width=1280,height=720,framerate=30/1,pixel-aspect-ratio=1/1 ! mux. audiotestsrc wave=ticks freq=330 name=audiosrc ! audio/x-raw,format=S16LE,channels=2,layout=interleaved,rate=48000 ! tee name=audio_tee audio_tee.! queue ! mux. matroskamux name=mux !"
+
