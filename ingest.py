@@ -449,7 +449,7 @@ def get_args():
 
 
 def main():
-    GObject.threads_init()
+
     Gst.init([])
 
     args = get_args()
