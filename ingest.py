@@ -165,6 +165,7 @@ def mk_audio_src(args, audiocaps):
         audio_src = """
         src. !
                 queue !
+                audioconvert !
                 """
 
     elif args.audio_source == 'pulse':
