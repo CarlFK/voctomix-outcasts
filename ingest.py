@@ -360,6 +360,7 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
 
 def get_args():
     parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             description='''Vocto-ingest Client with Net-time support.
             Gst caps are retrieved from the server.
             Run without parameters: send test av to localhost:10000
@@ -396,8 +397,8 @@ def get_args():
 
     parser.add_argument(
         '--video-elements', action='store',
-        default='videoconvert ! videorate ! videoscale',
-        help="gst video elments ! after src")
+        default='videoconvert ! yadif ! videorate ! videoscale',
+        help="gst video elments after src.")
 
     parser.add_argument(
         '--audio-source', action='store',
@@ -420,7 +421,7 @@ def get_args():
     parser.add_argument(
         '--audio-elements', action='store',
         default="audioconvert ! audioresample ! audiorate",
-        help="gst audio elments ! after src")
+        help="gst audio elments after src.")
 
     parser.add_argument(
         '-m', '--monitor', action='store_true',
