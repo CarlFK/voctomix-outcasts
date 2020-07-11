@@ -1,0 +1,19 @@
+July 10,2020
+
+ingest.py has a new parameter: --src
+
+it can be used instead of these 6:
+```
+  --video-source {dv,hdv,udp_h264,hdmi2usb,blackmagic,ximage,png,file,test,spacescope}
+  --video-attribs VIDEO_ATTRIBS
+  --video-elements VIDEO_ELEMENTS
+  --audio-source {dv,hdv,file,alsa,pulse,blackmagic,test}
+  --audio-attribs AUDIO_ATTRIBS
+  --audio-elements AUDIO_ELEMENTS
+```
+
+The above 6 parameters are used to construct a gst pipeline string, --src takes that same string as a parameter.  or some other string that can't be constructed, like for a simple logitech webcam:
+
+`ingest.py --src "v4l2src ! queue ! videoconvert ! videorate ! videoscale ! {videocaps} ! mux. audiotestsrc wave=ticks freq=330 ! {audiocaps} ! queue ! matroskamux name=mux"'
+
+{videocaps} and {audiocaps} come from voctocore, or they can be overridden with static values, not sure when one would need that.
