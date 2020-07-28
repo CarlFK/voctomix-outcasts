@@ -6,6 +6,13 @@ import json
 import gbulb
 import gi
 
+# sudo apt install pkg-config libgirepository1.0-dev python3-venv
+# sudo apt build-dep python3-cairo
+# python3 -m venv venv
+# . venv/bin/activate
+# pip3 install gbulb PyGObject wheel
+
+
 gi.require_version('Gst', '1.0')
 gi.require_version('GstNet', '1.0')
 from gi.repository import Gst, GstNet
