@@ -397,7 +397,7 @@ def get_args():
 
     parser.add_argument(
         '--video-elements', action='store',
-        default='videoconvert ! yadif ! videorate ! videoscale',
+        default='videoconvert ! deinterlace ! videorate ! videoscale',
         help="gst video elments after src.")
 
     parser.add_argument(
