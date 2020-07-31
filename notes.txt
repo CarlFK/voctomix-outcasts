@@ -1,3 +1,6 @@
+workon test1
+python3 ingest.py
+
 --src examples
 
 same as voctomix-ingest (test sources):
