@@ -88,6 +88,7 @@ def mk_video_src(args, videocaps):
             pngdec !
             """
         # tip: --video-attribs "loop=true"
+        # tip: --video-attribs "location=sc1204a.png"
 
     elif args.video_source == 'file':
         video_src = """
