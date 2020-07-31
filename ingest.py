@@ -2,8 +2,8 @@
 """
 ingest.py: source client for Voctomix.
 
-   Copyright: 2015,2016,2017 Carl F. Karsten <carl@nextdayvideo.com>,
-                             Ryan Verner <ryan@nextdayvideo.com.au>
+   Copyright: 2015-2020 Carl F. Karsten <carl@nextdayvideo.com>,
+                        Ryan Verner <ryan@nextdayvideo.com.au>
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to
@@ -80,8 +80,6 @@ def mk_video_src(args, videocaps):
         video_src = """
             decklinkvideosrc name=videosrc {attribs} !
             """
-        # yadif !
-        # deinterlace
 
     elif args.video_source == 'png':
         video_src = """
@@ -89,6 +87,7 @@ def mk_video_src(args, videocaps):
                 caps="image/png" !
             pngdec !
             """
+        # tip: --video-attribs "loop=true"
 
     elif args.video_source == 'file':
         video_src = """
