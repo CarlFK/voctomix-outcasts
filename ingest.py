@@ -164,19 +164,18 @@ def mk_audio_src(args, audiocaps):
         audio_src = """
         src. !
                 queue !
-                audioconvert !
                 """
 
     elif args.audio_source == 'pulse':
         audio_src = """
                 pulsesrc {attribs} {base_audio_attribs} name=audiosrc !
-                queue max-size-time=4000000000 ! audiorate !
+                queue max-size-time=4000000000 !
                 """
 
     elif args.audio_source == 'alsa':
         audio_src = """
                 alsasrc {attribs} {base_audio_attribs} name=audiosrc !
-                queue max-size-time=4000000000 ! audiorate !
+                queue max-size-time=4000000000 !
                 """
 
     elif args.audio_source == 'blackmagic':
