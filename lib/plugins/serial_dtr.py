@@ -1,9 +1,12 @@
 # Turning on a light opens a serial port, which pulls the DTR line high.
 # Turning off a light closes the serial port, pulling DTR low.
 
+from .base_plugin import BasePlugin
+
 __all__ = ['SerialDtr']
 
-class SerialDtr:
+
+class SerialDtr(BasePlugin):
     def __init__(self, config):
         self.fn = config.get('serial_dtr', 'port')
         self.fd = None

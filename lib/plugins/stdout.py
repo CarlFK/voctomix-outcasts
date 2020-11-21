@@ -1,10 +1,14 @@
-# Plugin to provide a tally light interface via stdout
+"""
+Plugin to provide a tally light interface via stdout.
+
+This is an example that can be used to build other plugins.
+"""
+
+from .base_plugin import BasePlugin
+
 __all__ = ['Stdout']
 
-class Stdout:
-    def __init__(self, config):
-        pass
-
+class Stdout(BasePlugin):
     def tally_on(self):
         print('Tally light on')
 
