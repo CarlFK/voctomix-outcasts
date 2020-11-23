@@ -1,21 +1,21 @@
 # Makes a tomu.im USB Simple sample as a tally light.
 # https://github.com/im-tomu/tomu-samples/tree/master/usb_simple
 
-__all__ = ['TomuSimpleLed']
+from .base_plugin import BasePlugin
 
-DO_USB = True
 try:
     import usb.core
 except ImportError:
-    DO_USB = False
+    usb = None
 
 
-class Tomu:
+class Tomu(BasePlugin):
     def __init__(self, config):
+        if not usb:
+            raise ValueError('USB support not available. Install pyusb')
+
         self.on = int(config.get('tomu', 'on'))
         self.off = int(config.get('tomu', 'off'))
-        if not DO_USB:
-            raise ValueError('USB support not available. Install pyusb')
 
         self.device = usb.core.find(idVendor=0x1209, idProduct=0x70b1)
         if self.device is None:

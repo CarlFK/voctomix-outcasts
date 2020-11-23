@@ -4,7 +4,7 @@ from argparse import ArgumentParser, FileType
 from sys import exit
 
 from lib.config import Config
-from lib.plugins.all_plugins import PLUGINS
+from lib.plugins.all_plugins import get_plugin
 
 def main():
     parser = ArgumentParser(
@@ -13,13 +13,7 @@ def main():
         '-c', '--config', type=FileType('r'), help='Use a specific config file')
     args = parser.parse_args()
     config = Config(cmd_line_config=args.config)
-
-    plugin_cls = PLUGINS.get(config.get('light', 'plugin'), None)
-    if plugin_cls is None:
-        print('No plugin selected, control will not work!')
-        exit(1)
-
-    plugin = plugin_cls(config)
+    plugin = get_plugin(config)
 
     try:
         while True:

@@ -9,7 +9,7 @@ import json
 from sys import exit
 
 from lib.config import Config
-from lib.plugins.all_plugins import PLUGINS
+from lib.plugins.all_plugins import get_plugin
 
 
 class Connection(asyncio.Protocol):
@@ -122,12 +122,7 @@ if __name__ == '__main__':
         help='Show what would be done in addition to toggling lights')
     args = parser.parse_args()
     config = Config(cmd_line_config=args.config)
-    plugin_cls = PLUGINS.get(config.get('light', 'plugin'), None)
-    if plugin_cls is None:
-        print('No plugin selected, control will not work!')
-        exit(1)
-
-    actor = plugin_cls(config)
+    actor = get_plugin(config)
     interpreter = Interpreter(actor, config, debug=args.debug)
     conn = Connection(interpreter)
     conn.connect(config.get('server', 'host'))
