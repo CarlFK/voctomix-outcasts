@@ -98,6 +98,14 @@ def mk_video_src(args, videocaps):
             queue !
             """
 
+    elif args.video_source == 'rtmp':
+        video_src = """
+            rtmpsrc {attribs} !
+            decodebin name=src
+            src. !
+            queue !
+            """
+
     elif args.video_source == 'test':
 
         video_src = """
@@ -159,7 +167,7 @@ def mk_audio_src(args, audiocaps):
                 queue !
                 """
 
-    elif args.audio_source == 'file':
+    elif args.audio_source in ('file', 'rtmp'):
         # this only works if video is from ...
         # some gst source that gets demux ed, I guess.
         audio_src = """
@@ -380,7 +388,7 @@ def get_args():
         '--video-source', action='store',
         choices=[
             'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'file', 'test', 'spacescope'],
+            'ximage', 'png', 'file', 'rtmp', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
 
@@ -402,7 +410,7 @@ def get_args():
     parser.add_argument(
         '--audio-source', action='store',
         choices=['dv', 'hdv', 'file',
-            'alsa', 'pulse', 'blackmagic', 'test', ],
+            'alsa', 'pulse', 'blackmagic', 'rtmp', 'test',],
         default='test',
         help="Where to get audio from")
 
