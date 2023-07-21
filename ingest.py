@@ -59,8 +59,7 @@ def mk_video_src(args, videocaps):
         decodebin !
             """
 
-    elif args.video_source == 'hdmi2usb':
-        # https://hdmi2usb.tv
+    elif args.video_source in ('hdmi2usb', 'uvc-mjpeg'):
         video_src = """
             v4l2src {attribs} name=videosrc !
         """
@@ -395,8 +394,8 @@ def get_args():
     parser.add_argument(
         '--video-source', action='store',
         choices=[
-            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'file', 'rtmp', 'test', 'spacescope'],
+            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'uvc-mjpeg',
+            'blackmagic', 'ximage', 'png', 'file', 'rtmp', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
 
