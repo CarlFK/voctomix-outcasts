@@ -69,6 +69,16 @@ def mk_video_src(args, videocaps):
                 jpegdec !
             """.format(caps=extract_caps(videocaps))
 
+    elif args.video_source == 'uvc-raw':
+
+        video_src = """
+            v4l2src {attribs} name=videosrc !
+        """
+        video_src += """
+        video/x-raw,{caps} !
+        """.format(
+            caps=extract_caps(videocaps))
+
     elif args.video_source == 'ximage':
         # startx=0 starty=0 endx=1919 endy=1079 !
         video_src = """
@@ -394,7 +404,7 @@ def get_args():
     parser.add_argument(
         '--video-source', action='store',
         choices=[
-            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'uvc-mjpeg',
+            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'uvc-mjpeg', 'uvc-raw',
             'blackmagic', 'ximage', 'png', 'file', 'rtmp', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
