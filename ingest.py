@@ -61,7 +61,7 @@ def mk_video_src(args, videocaps):
 
     elif args.video_source == 'hdmi2usb':
         # https://hdmi2usb.tv
-        # Note: this code works with 720p
+        # Note: this code *only* works with 720p
         video_src = """
             v4l2src {attribs} name=videosrc !
                 queue max-size-time=4000000000 !
@@ -121,16 +121,14 @@ def mk_video_src(args, videocaps):
            """
 
     if args.monitor:
-        if args.debug:
-            videosink="fpsdisplaysink"
-        else:
-            videosink="autovideosink"
 
-        video_src += """
+        videosink=args.monitor
+
+        video_src += f"""
             tee name=t ! queue !
                     videoconvert ! {videosink} sync=false
                     t. ! queue !
-            """.format(videosink=videosink)
+            """
 
     if args.video_elements:
         video_src += args.video_elements + " !\n"
@@ -423,8 +421,9 @@ def get_args():
         help="gst audio elments after src.")
 
     parser.add_argument(
-        '-m', '--monitor', action='store_true',
-        help="local display sink")
+        '-m', '--monitor',
+        # action='store_true',
+        help="local display sink (autovideosink, fbdevsink, fpsdisplaysink...")
 
     parser.add_argument(
         '--host', action='store',
