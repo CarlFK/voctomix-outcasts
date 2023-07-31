@@ -2,6 +2,10 @@
 
 Components used with Voctomix.
 
+# Install notes (Debian)
+for fbdevsink:
+sudo apt install gstreamer1.0-tools gstreamer1.0-plugins-bad
+
 # Getting started / Demo:
 Install the dependencies listed here:
 https://github.com/voc/voctomix#installation
