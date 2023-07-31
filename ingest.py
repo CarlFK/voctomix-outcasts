@@ -59,15 +59,25 @@ def mk_video_src(args, videocaps):
         decodebin !
             """
 
-    elif args.video_source == 'hdmi2usb':
-        # https://hdmi2usb.tv
-        # Note: this code *only* works with 720p
+    elif args.video_source in ('hdmi2usb', 'uvc-mjpeg'):
         video_src = """
             v4l2src {attribs} name=videosrc !
+        """
+        video_src += """
                 queue max-size-time=4000000000 !
-        image/jpeg,width=1280,height=720 !
+        image/jpeg,{caps} !
                 jpegdec !
-            """
+            """.format(caps=extract_caps(videocaps))
+
+    elif args.video_source == 'uvc-raw':
+
+        video_src = """
+            v4l2src {attribs} name=videosrc !
+        """
+        video_src += """
+        video/x-raw,{caps} !
+        """.format(
+            caps=extract_caps(videocaps))
 
     elif args.video_source == 'ximage':
         # startx=0 starty=0 endx=1919 endy=1079 !
@@ -93,6 +103,14 @@ def mk_video_src(args, videocaps):
     elif args.video_source == 'file':
         video_src = """
             multifilesrc {attribs} !
+            decodebin name=src
+            src. !
+            queue !
+            """
+
+    elif args.video_source == 'rtmp':
+        video_src = """
+            rtmpsrc {attribs} !
             decodebin name=src
             src. !
             queue !
@@ -157,7 +175,7 @@ def mk_audio_src(args, audiocaps):
                 queue !
                 """
 
-    elif args.audio_source == 'file':
+    elif args.audio_source in ('file', 'rtmp'):
         # this only works if video is from ...
         # some gst source that gets demux ed, I guess.
         audio_src = """
@@ -198,6 +216,13 @@ def mk_audio_src(args, audiocaps):
     audio_src = audio_src.format(**d)
 
     return audio_src
+
+
+def extract_caps(videocaps, caps=("width", "height")):
+    """Filter out caps (list of keys) from a videocaps strings"""
+    parts = videocaps.split(',')
+    filtered = [cap for cap in parts if cap.split('=')[0] in caps]
+    return ','.join(filtered)
 
 
 def mk_client(core_ip, port):
@@ -377,8 +402,8 @@ def get_args():
     parser.add_argument(
         '--video-source', action='store',
         choices=[
-            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'blackmagic',
-            'ximage', 'png', 'file', 'test', 'spacescope'],
+            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'uvc-mjpeg', 'uvc-raw',
+            'blackmagic', 'ximage', 'png', 'file', 'rtmp', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
 
@@ -400,7 +425,7 @@ def get_args():
     parser.add_argument(
         '--audio-source', action='store',
         choices=['dv', 'hdv', 'file',
-            'alsa', 'pulse', 'blackmagic', 'test', ],
+            'alsa', 'pulse', 'blackmagic', 'rtmp', 'test',],
         default='test',
         help="Where to get audio from")
 
