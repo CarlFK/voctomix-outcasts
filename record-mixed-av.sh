@@ -21,6 +21,9 @@
 
 # splitmuxsink — Muxer wrapper for splitting output stream by size or time
 
+# https://gstreamer.freedesktop.org/documentation/multifile/splitmuxsink.html?gi-language=c#splitmuxsink
+
+
 dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
 
 mkdir -p $dest_dir
