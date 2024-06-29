@@ -27,7 +27,7 @@ segment_time=1800  # 30 min
 
 mkdir -p $dest_dir/$(date +%Y-%m-%d)
 
-ffmpeg \
+exec ffmpeg \
     -nostdin -y \
     -analyzeduration 10000 \
     -thread_queue_size 512 \
