@@ -83,6 +83,13 @@ class Interpreter(object):
               print('LED has been switched off')
               actor.tally_off()
 
+    def handle_composite(self, composite_mode):
+        """Parse `sbs(a,b)` into mode=sbs, cam_a=a, cam_b=b"""
+        mode, rest = composite_mode.split('(', 1)
+        cam_a, cam_b = rest.rstrip(')').split(',', 1)
+        self.handle_video_status([cam_a, cam_b])
+        self.handle_composite_mode(mode)
+
     def handle_video_status(self, cams):
         mycam = self.config.get('light', 'cam')
         if mycam in cams:
@@ -95,11 +102,11 @@ class Interpreter(object):
 
     def handle_composite_mode(self, mode_list):
         mode = mode_list[0]
-        if mode == 'fullscreen':
+        if mode in ('fullscreen', 'fs'):
             self.composite_mode = CompositeModes.fullscreen
-        elif mode == 'side_by_side_equal':
+        elif mode in ('side_by_side_equal', 'sbs'):
             self.composite_mode = CompositeModes.side_by_side_equal
-        elif mode == 'side_by_side_preview':
+        elif mode in ('side_by_side_preview', 'lec'):
             self.composite_mode = CompositeModes.side_by_side_preview
         elif mode == 'picture_in_picture':
             self.composite_mode = CompositeModes.picture_in_picture
