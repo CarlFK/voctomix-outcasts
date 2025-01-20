@@ -47,5 +47,9 @@ gst-launch-1.0 \
         queue !\
         mux.audio_0 \
     \
-    splitmuxsink name=mux location="${dest_dir}/$(date +%H_%M_%S)-%06d.mov" max-size-time=10000000000 # max-size-bytes=1000000
+    splitmuxsink name=mux location="${dest_dir}/$(date +%H_%M_%S)-%06d.mov" max-size-time=1800000000000
+
+# max-size-time=1800000000000 should be 30 min
+# >>> 1000000000 * 60 *30
+# 1800000000000
 
