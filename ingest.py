@@ -43,7 +43,29 @@ def mk_video_src(args, videocaps):
     # args come from command line
     # videocaps come from voctocore
 
-    if args.video_source == 'dv':
+    if args.video_source == 'test':
+
+        video_src = """
+    videotestsrc name=videosrc {attribs} !
+    """
+        # things to render as text ontop of test video
+        video_src += """
+    clockoverlay
+        text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
+        halignment=left line-alignment=left !
+            """.format(hostname=socket.gethostname(),
+                    videocaps=videocaps,
+                    attribs=args.video_attribs)
+
+    elif args.video_source == 'spacescope':
+        # Stereo visualizer
+        # pair up with audoi test beep for a handy AV sync test.
+        video_src = """
+      audio_tee. ! queue !
+    spacescope shader=none style=lines {attribs} !
+           """
+
+    elif args.video_source == 'dv':
         video_src = """
             dv1394src name=videosrc {attribs} !
         dvdemux name=demux !
@@ -116,27 +138,6 @@ def mk_video_src(args, videocaps):
             queue !
             """
 
-    elif args.video_source == 'test':
-
-        video_src = """
-    videotestsrc name=videosrc {attribs} !
-    """
-        # things to render as text ontop of test video
-        video_src += """
-    clockoverlay
-        text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
-        halignment=left line-alignment=left !
-            """.format(hostname=socket.gethostname(),
-                    videocaps=videocaps,
-                    attribs=args.video_attribs)
-
-    elif args.video_source == 'spacescope':
-        # Stereo visualizer
-        # pair up with test beep for a handy AV sync test.
-        video_src = """
-      audio_tee. ! queue !
-    spacescope shader=none style=lines {attribs} !
-           """
     else:
         # What I wish I had done from the start.
         # similar to args.src, only just for the video part.
@@ -170,7 +171,12 @@ def mk_audio_src(args, audiocaps):
         'audiocaps': audiocaps,
     }
 
-    if args.audio_source in ['dv', 'hdv']:
+    if args.audio_source == 'test':
+        audio_src = """
+            audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
+            """
+
+    elif args.audio_source in ['dv', 'hdv']:
         # this only works if video is from DV also.
         # or some gst source that gets demux ed
         audio_src = """
@@ -203,10 +209,6 @@ def mk_audio_src(args, audiocaps):
             decklinkaudiosrc name=audiosrc {attribs} !
             """
 
-    elif args.audio_source == 'test':
-        audio_src = """
-            audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
-            """
     else:
         # What I wish I had done from the start.
         # similar to args.src, only just for the audio part.
