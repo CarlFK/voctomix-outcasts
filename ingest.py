@@ -46,13 +46,13 @@ def mk_video_src(args, videocaps):
     if args.video_source == 'test':
 
         video_src = """
-    videotestsrc name=videosrc {attribs} !
+    videotestsrc name=videosrc {attribs}
     """
         # things to render as text ontop of test video
-        video_src += """
+        video_src += """ !
     clockoverlay
         text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
-        halignment=left line-alignment=left !
+        halignment=left line-alignment=left
             """.format(hostname=socket.gethostname(),
                     videocaps=videocaps,
                     attribs=args.video_attribs)
@@ -62,7 +62,7 @@ def mk_video_src(args, videocaps):
         # pair up with audoi test beep for a handy AV sync test.
         video_src = """
       audio_tee. ! queue !
-    spacescope shader=none style=lines {attribs} !
+    spacescope shader=none style=lines {attribs}
            """
 
     elif args.video_source == 'dv':
@@ -70,7 +70,7 @@ def mk_video_src(args, videocaps):
             dv1394src name=videosrc {attribs} !
         dvdemux name=demux !
         queue max-size-time=4000000000 !
-        dvdec !
+        dvdec
             """
 
     elif args.video_source == 'hdv':
@@ -78,46 +78,47 @@ def mk_video_src(args, videocaps):
             hdv1394src {attribs} name=videosrc !
         tsdemux !
         queue max-size-time=4000000000 !
-        decodebin !
+        decodebin
             """
 
     elif args.video_source in ('hdmi2usb', 'uvc-mjpeg'):
         video_src = """
-            v4l2src {attribs} name=videosrc !
+            v4l2src {attribs} name=videosrc
         """
-        video_src += """
+        video_src += """ !
                 queue max-size-time=4000000000 !
         image/jpeg,{caps} !
-                jpegdec !
+                jpegdec
             """.format(caps=extract_caps(videocaps))
 
     elif args.video_source == 'uvc-raw':
 
         video_src = """
-            v4l2src {attribs} name=videosrc !
+            v4l2src {attribs} name=videosrc
         """
-        video_src += """
-        video/x-raw,{caps} !
+        video_src += """ !
+        video/x-raw,{caps}
         """.format(
             caps=extract_caps(videocaps))
 
     elif args.video_source == 'ximage':
+        # Doesn't work with Wayland.
         # startx=0 starty=0 endx=1919 endy=1079 !
         video_src = """
             ximagesrc {attribs} name=videosrc
-                   use-damage=false !
+                   use-damage=false
             """
 
     elif args.video_source == 'blackmagic':
         video_src = """
-            decklinkvideosrc name=videosrc {attribs} !
+            decklinkvideosrc name=videosrc {attribs}
             """
 
     elif args.video_source == 'png':
         video_src = """
             multifilesrc {attribs}
                 caps="image/png" !
-            pngdec !
+            pngdec
             """
         # tip: --video-attribs "loop=true"
         # tip: --video-attribs "location=sc1204a.png"
@@ -127,7 +128,7 @@ def mk_video_src(args, videocaps):
             multifilesrc {attribs} !
             decodebin name=src
             src. !
-            queue !
+            queue
             """
 
     elif args.video_source == 'rtmp':
@@ -135,9 +136,8 @@ def mk_video_src(args, videocaps):
             rtmpsrc {attribs} !
             decodebin name=src
             src. !
-            queue !
+            queue
             """
-
     else:
         # What I wish I had done from the start.
         # similar to args.src, only just for the video part.
@@ -146,16 +146,16 @@ def mk_video_src(args, videocaps):
 
     if args.monitor:
 
-        video_src += f"""
+        video_src += f""" !
             tee name=t ! queue !
                     videoconvert ! {args.monitor} sync=false
-                    t. ! queue !
+                    t. ! queue
             """
 
     if args.video_elements:
-        video_src += f" {args.video_elements} !\n"
+        video_src += f" ! {args.video_elements}\n"
 
-    video_src += videocaps + " !\n"
+    video_src += f" ! {videocaps}\n"
 
     video_src = video_src.format(attribs=args.video_attribs)
 
@@ -173,7 +173,7 @@ def mk_audio_src(args, audiocaps):
 
     if args.audio_source == 'test':
         audio_src = """
-            audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
+            audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc
             """
 
     elif args.audio_source in ['dv', 'hdv']:
@@ -181,7 +181,7 @@ def mk_audio_src(args, audiocaps):
         # or some gst source that gets demux ed
         audio_src = """
             demux.audio !
-                queue !
+                queue
                 """
 
     elif args.audio_source in ('file', 'rtmp'):
@@ -189,26 +189,25 @@ def mk_audio_src(args, audiocaps):
         # some gst source that gets demux ed, I guess.
         audio_src = """
         src. !
-                queue !
+                queue
                 """
 
     elif args.audio_source == 'pulse':
         audio_src = """
                 pulsesrc {attribs} {base_audio_attribs} name=audiosrc !
-                queue max-size-time=4000000000 !
+                queue max-size-time=4000000000
                 """
 
     elif args.audio_source == 'alsa':
         audio_src = """
                 alsasrc {attribs} {base_audio_attribs} name=audiosrc !
-                queue max-size-time=4000000000 !
+                queue max-size-time=4000000000
                 """
 
     elif args.audio_source == 'blackmagic':
         audio_src = """
-            decklinkaudiosrc name=audiosrc {attribs} !
+            decklinkaudiosrc name=audiosrc {attribs}
             """
-
     else:
         # What I wish I had done from the start.
         # similar to args.src, only just for the audio part.
@@ -216,13 +215,13 @@ def mk_audio_src(args, audiocaps):
 
 
     if args.audio_elements:
-        audio_src += f" {args.audio_elements} !\n"
+        audio_src += f" ! {args.audio_elements}\n"
 
 
     audio_src += """
-       {audiocaps} !
-    tee name=audio_tee
-      audio_tee. ! queue !
+    !   {audiocaps}
+    ! tee name=audio_tee
+      audio_tee. ! queue
       """
     audio_src = audio_src.format(**d)
 
@@ -254,17 +253,17 @@ def mk_pipeline(args, server_caps, core_ip):
         audio_src = mk_audio_src(args, server_caps['audiocaps'])
         src =  """
             {video_src}
-             mux.
+             ! mux.
             {audio_src}
-             mux.
-            matroskamux name=mux !
+             ! mux.
+            matroskamux name=mux
         """.format(video_src=video_src, audio_src=audio_src)
 
     client = mk_client(core_ip, args.port)
 
     pipeline = """
             {src}
-    {client}
+    ! {client}
     """.format(src=src, client=client)
 
     # remove blank lines to make it more human readable

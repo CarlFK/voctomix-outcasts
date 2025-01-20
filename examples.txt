@@ -1,11 +1,11 @@
 
 
 Raspberry Pi camera
-  --video-source "libcamerasrc name=videosrc ! video/x-raw,colorimetry=bt709,format=NV12,interlace-mode=progressive,width=1280,height=720 ! "
+  --video-source "libcamerasrc name=videosrc ! video/x-raw,colorimetry=bt709,format=NV12,interlace-mode=progressive,width=1280,height=720"
 
 HDMI grabbers:
 
---video-source "v4l2src  name=videosrc ! queue max-size-time=4000000000 ! image/jpeg,width=1280,height=720 ! jpegdec ! "
+--video-source "v4l2src  name=videosrc ! queue max-size-time=4000000000 ! image/jpeg,width=1280,height=720 ! jpegdec"
 
-"v4l2src  name=videosrc ! queue max-size-time=4000000000 ! image/jpeg,width=1280,height=720 ! jpegparse ! v4l2jpegdec !
+--video-source "v4l2src  name=videosrc ! queue max-size-time=4000000000 ! image/jpeg,width=1280,height=720 ! jpegparse ! v4l2jpegdec"
 
