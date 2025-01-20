@@ -36,7 +36,7 @@ gst-launch-1.0 \
     demux. !\
         queue !\
         videoconvert !\
-        avenc_mpeg2video bitrate=5000000 max-key-interval=0 !\
+        x264enc bitrate=3000000 key-int-max=10 ! h264parse !\
         queue !\
         mux. \
     \
@@ -45,8 +45,7 @@ gst-launch-1.0 \
         audioconvert !\
         avenc_mp2 bitrate=192000 !\
         queue !\
-        mux. \
+        mux.audio_0 \
     \
-    mpegtsmux name=mux !\
-        filesink location="$dest_dir/$(date +%H_%M_%S).gs.ts"
+    splitmuxsink name=mux location="${dest_dir}/$(date +%H_%M_%S)-%06d.mov" max-size-time=10000000000 # max-size-bytes=1000000
 
