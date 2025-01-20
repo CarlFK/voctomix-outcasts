@@ -137,19 +137,22 @@ def mk_video_src(args, videocaps):
       audio_tee. ! queue !
     spacescope shader=none style=lines {attribs} !
            """
+    else:
+        # What I wish I had done from the start.
+        # similar to args.src, only just for the video part.
+        video_src = args.video_source
+
 
     if args.monitor:
 
-        videosink=args.monitor
-
         video_src += f"""
             tee name=t ! queue !
-                    videoconvert ! {videosink} sync=false
+                    videoconvert ! {args.monitor} sync=false
                     t. ! queue !
             """
 
     if args.video_elements:
-        video_src += args.video_elements + " !\n"
+        video_src += f" {args.video_elements} !\n"
 
     video_src += videocaps + " !\n"
 
@@ -204,9 +207,15 @@ def mk_audio_src(args, audiocaps):
         audio_src = """
             audiotestsrc wave=ticks freq=330 {attribs} name=audiosrc !
             """
+    else:
+        # What I wish I had done from the start.
+        # similar to args.src, only just for the audio part.
+        audio_src = args.audio_source
+
 
     if args.audio_elements:
-        audio_src += args.audio_elements + " !\n"
+        audio_src += f" {args.audio_elements} !\n"
+
 
     audio_src += """
        {audiocaps} !
@@ -401,9 +410,6 @@ def get_args():
 
     parser.add_argument(
         '--video-source', action='store',
-        choices=[
-            'dv', 'hdv', 'udp_h264', 'hdmi2usb', 'uvc-mjpeg', 'uvc-raw',
-            'blackmagic', 'ximage', 'png', 'file', 'rtmp', 'test', 'spacescope'],
         default='test',
         help="Where to get video from")
 
@@ -424,8 +430,6 @@ def get_args():
 
     parser.add_argument(
         '--audio-source', action='store',
-        choices=['dv', 'hdv', 'file',
-            'alsa', 'pulse', 'blackmagic', 'rtmp', 'test',],
         default='test',
         help="Where to get audio from")
 
