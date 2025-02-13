@@ -5,7 +5,7 @@ cd ../../voctomix
 
 ./voctocore/voctocore.py -i ../voctomix-outcasts/configs/test1.ini &
 sleep 5
-./voctogui/voctogui.py &
+GDK_BACKEND=x11 ./voctogui/voctogui.py &
 ../voctomix-outcasts/ingest.py &
 ../voctomix-outcasts/ingest.py --source-id cam2 &
 ../voctomix-outcasts/ingest.py \
