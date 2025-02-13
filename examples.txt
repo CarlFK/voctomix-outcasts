@@ -9,3 +9,17 @@ HDMI grabbers:
 
 --video-source "v4l2src  name=videosrc ! queue max-size-time=4000000000 ! image/jpeg,width=1280,height=720 ! jpegparse ! v4l2jpegdec"
 
+
+Monitors
+--monitor waylandsink
+--monitor fbdevsink
+--monitor glimagesink
+
+Audio
+
+hid-generic 0003:17A0:0305.0005: input,hidraw1: USB HID v1.00 Device [Samson Technologies Samson GoMic] on usb-xhci-hcd.0-2/input3
+arecord -l
+card 3: GoMic [Samson GoMic], device 0: USB Audio [USB Audio]
+
+--audio-source "alsasrc device=hw:3 provide-clock=false slave-method=re-timestamp name=audiosrc ! queue max-size-time=4000000000"
+
