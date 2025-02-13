@@ -36,7 +36,8 @@ gst-launch-1.0 \
     demux. !\
         queue !\
         videoconvert !\
-        x264enc bitrate=3000000 key-int-max=10 ! h264parse !\
+        x264enc bitrate=3000000 key-int-max=10 tune=zerolatency ! \
+        h264parse !\
         queue !\
         mux. \
     \
