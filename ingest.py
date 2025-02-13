@@ -374,18 +374,18 @@ def run_pipeline(pipeline, clock, audio_delay=0, video_delay=0):
     senderPipeline.bus.connect("message::eos", on_eos)
     senderPipeline.bus.connect("message::error", on_error)
 
-    print("playing...")
+    print("ingest.py: streaming to core...")
     senderPipeline.set_state(Gst.State.PLAYING)
 
     mainloop = GLib.MainLoop()
     try:
         mainloop.run()
     except KeyboardInterrupt:
-        print('Terminated via Ctrl-C')
+        print('ingest.py: Terminated via Ctrl-C')
 
-    print('Shutting down...')
+    print('ingest.py: Shutting down...')
     senderPipeline.set_state(Gst.State.NULL)
-    print('Done.')
+    print('ingest.py: Done.')
 
     return
 
