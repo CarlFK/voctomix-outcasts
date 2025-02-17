@@ -12,14 +12,11 @@
 # all copies or substantial portions of the Software.
 
 # $1 - destination dir. default: ~/Videos
-# files will be $dest_dir/$date/$time.gs.ts
-# (.gs to keep these apart from the files created by record-timestamp.sh)
+# files will be $dest_dir/$date/$time_000000.mov
 
-# NB: does not chunk files.  keeps saving untill the process is killed.
-
-# TODO: https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-good/html/gst-plugins-good-plugins-splitmuxsink.html
-
-# splitmuxsink — Muxer wrapper for splitting output stream by size or time
+# NB: It now chunks files, but the filename is just foo001, foo002...
+# currently no support for hh_mm_ss.
+# $(date +%H_%M_%S)-%06d.mov is: all files get the time this process started, followed by a segment number.
 
 # https://gstreamer.freedesktop.org/documentation/multifile/splitmuxsink.html?gi-language=c#splitmuxsink
 
@@ -36,7 +33,7 @@ gst-launch-1.0 \
     demux. !\
         queue !\
         videoconvert !\
-        x264enc bitrate=3000000 key-int-max=10 tune=zerolatency ! \
+        x264enc speed-preset=superfast qp-min=18 psy-tune=animation key-int-max=10 tune=zerolatency ! \
         h264parse !\
         queue !\
         mux. \
