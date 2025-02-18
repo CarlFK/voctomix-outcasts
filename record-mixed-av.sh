@@ -25,7 +25,7 @@ dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
 
 mkdir -p $dest_dir
 
-gst-launch-1.0 \
+exec gst-launch-1.0 \
     tcpclientsrc host=localhost port=11000 !\
     \
     matroskademux name=demux \
