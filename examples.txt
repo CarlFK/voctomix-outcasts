@@ -9,6 +9,10 @@ HDMI grabbers:
 
 --video-source "v4l2src  name=videosrc ! queue max-size-time=4000000000 ! image/jpeg,width=1280,height=720 ! jpegparse ! v4l2jpegdec"
 
+# sweep and clock
+--video-source "videotestsrc pattern=ball motion=hsweep animation-mode=wall-time flip=true is-live=true ! \
+    clockoverlay shaded-background=true"
+
 
 Monitors
 --monitor waylandsink
@@ -22,4 +26,7 @@ arecord -l
 card 3: GoMic [Samson GoMic], device 0: USB Audio [USB Audio]
 
 --audio-source "alsasrc device=hw:3 provide-clock=false slave-method=re-timestamp name=audiosrc ! queue max-size-time=4000000000"
+
+# solid tone
+--audio-source "audiotestsrc is-live=true"
 
