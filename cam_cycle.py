@@ -31,12 +31,9 @@ from lib.corebits import VocConf, VocCmd
 
 def sources_cycle(vc, sources, delay):
 
-    c=0
     while True:
         for source in sources:
             vc.vocto_write(f"set_video_a {source}")
-            c+=1
-            print(c)
             sleep(delay)
 
 
