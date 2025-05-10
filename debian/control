@@ -1,27 +1,30 @@
 Source: voctomix-outcasts
 Section: video
 Priority: optional
-Maintainer: Carl F. Karsten <carl@nextdayvideo.com>
-Build-Depends: debhelper (>=9), python3, python3:any, dh-python, pandoc
-Standards-Version: 3.9.8
+Maintainer: Holger Levsen <holger@debian.org>
+Uploaders: Stefano Rivera <stefanor@debian.org>
+Build-Depends: debhelper-compat (=13), dh-python, python3
+Standards-Version: 4.5.0
 Homepage: https://github.com/CarlFK/voctomix-outcasts
-# Vcs-Git: git://anonscm.debian.org/collab-maint/voctomix.git
-# Vcs-Browser: https://anonscm.debian.org/git/collab-maint/voctomix.git
-X-Python-Version: >= 3
+Vcs-Git: https://salsa.debian.org/debian/voctomix-outcasts.git
+Vcs-Browser: https://salsa.debian.org/debian/voctomix-outcasts
+Rules-Requires-Root: no
 
 Package: voctomix-outcasts
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python3:Depends},
- python3,
- python3-gi,
- gstreamer1.0-plugins-base,
+Depends:
+ gir1.2-gst-plugins-base-1.0,
  gstreamer1.0-plugins-good,
- libgstreamer1.0-0,
- gstreamer1.0-tools
-Suggests: gstreamer1.0-libav,
- gstreamer1.0-plugins-bad,
- gstreamer1.0-plugins-ugly
-Description: Additional files used with Voctomix
+ python3-gi,
+ ${misc:Depends},
+ ${python3:Depends}
+Recommends:
+ gstreamer1.0-alsa,
+ gstreamer1.0-x,
+ python3-usb,
+Description: Additional scripts to be used with Voctomix
+ A collection of helper scripts for Voctomix, which have not been included
+ in Voctomix itself.
  .
- This package does not depend on any of Voctomix, it can be installed on a client machine that connects to a 2nd machine running Voctomix-core 
-
+ This package does not depend on any of Voctomix, as it can be installed on
+ any client machine that connects to a another machine running voctomix-core.

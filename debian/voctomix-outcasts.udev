@@ -1,0 +1,2 @@
+SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="1209", ATTR{idProduct}=="70b1", \
+    TAG+="uaccess"

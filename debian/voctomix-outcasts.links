@@ -1,0 +1,5 @@
+usr/share/voctomix-outcasts/generate-cut-list.py usr/bin/voctomix-generate-cut-list
+usr/share/voctomix-outcasts/ingest.py usr/bin/voctomix-ingest
+usr/share/voctomix-outcasts/record-mixed-av.sh usr/bin/voctomix-record-mixed-av
+usr/share/voctomix-outcasts/record-timestamp.sh usr/bin/voctomix-record-timestamp
+usr/share/voctomix-outcasts/voctolight.py usr/bin/voctolight

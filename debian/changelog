@@ -1,18 +1,181 @@
-voctomix-outcasts (0.3-1ubuntu1) wily; urgency=medium
+voctomix-outcasts (0.9.3-2) unstable; urgency=medium
 
-  * Add example scripts to OS path
+  * Bump debhelper-compat to 13.
+  * Bump Standards-Version to 4.5.0, no changes needed.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository,
+    Repository-Browse, thanks lintian-brush.
+  * Bump copyright years too.
 
- -- Carl F Karsten <carl@nextdayvideo.com>  Wed, 18 May 2016 02:47:44 -0500
+ -- Holger Levsen <holger@debian.org>  Tue, 12 May 2020 22:19:36 +0200
 
-voctomix-outcasts (0.2-1ubuntu1) xenial; urgency=medium
+voctomix-outcasts (0.9.3-1) unstable; urgency=medium
 
-  * Added scripts and configs from lca
+  * New upstream release. Closes: #948744.
+  * Bump Standards-Version to 4.4.1, no changes needed.
+  * Bump copyright years.
 
- -- Carl F Karsten <carl@nextdayvideo.com>  Thu, 05 May 2016 11:28:30 -0500
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 14 Jan 2020 11:00:49 +0200
 
-voctomix-outcasts (0.1-1) wily; urgency=medium
+voctomix-outcasts (0.9.2-1) unstable; urgency=medium
 
-  * Initial release. 
+  * New upstream release.
 
- -- Carl F Karsten <carl@nextdayvideo.com>  Sun, 01 May 2016 21:11:53 -0400
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 21 Jul 2019 13:05:22 -0300
 
+voctomix-outcasts (0.9.1-3) unstable; urgency=medium
+
+  * Bump standards version to 4.4.0, no changes needed.
+  * Use debhelper-compat 12.
+
+ -- Holger Levsen <holger@debian.org>  Sat, 13 Jul 2019 11:37:41 +0200
+
+voctomix-outcasts (0.9.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Holger Levsen <holger@debian.org>  Sun, 07 Jul 2019 16:55:00 +0200
+
+voctomix-outcasts (0.9.1-1) experimental; urgency=medium
+
+  * New upstream release. Closes: #930043.
+
+ -- Holger Levsen <holger@debian.org>  Sat, 15 Jun 2019 13:40:16 +0200
+
+voctomix-outcasts (0.9.0-1) experimental; urgency=medium
+
+  * New upstream release. Closes: #927347.
+
+ -- Holger Levsen <holger@debian.org>  Fri, 24 May 2019 17:41:59 +0200
+
+voctomix-outcasts (0.8.0-1) unstable; urgency=medium
+
+  * New upstream release, which does not exit with error on EOS.
+    Closes: #926828.
+  * Recommend gstreamer1.0-alsa for USB microphones. Closes: #926829.
+
+ -- Holger Levsen <holger@debian.org>  Thu, 11 Apr 2019 14:18:57 +0200
+
+voctomix-outcasts (0.7.0-1) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * New upstream release.
+  * Simplify debian/copyright.
+  * Recommend python3-usb, it's required for TOMU tally lights.
+  * Add a udev rule to allow uaccess to TOMU tally lgihts.
+
+  [ Holger Levsen ]
+  * d/rules: use plain rm instead of $(RM).
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 19 Jan 2019 17:03:34 +1300
+
+voctomix-outcasts (0.6.0-1) unstable; urgency=medium
+
+  * New upstream version.
+  * Bump standards version to 4.3.0, no changes needed.
+  * d/copyright:
+    - fix global-files-wildcard-not-first-paragraph-in-dep5-copyright lintian
+      warning.
+    - update copyright years.
+
+ -- Holger Levsen <holger@debian.org>  Tue, 08 Jan 2019 15:44:04 +0100
+
+voctomix-outcasts (0.5.0-5) unstable; urgency=medium
+
+  * Bump debian/compat to 11 and build-depend on debhelper >= 11.
+  * Use the new debhelper-compat(=11) notation and drop d/compat.
+  * Bump standards version to 4.2.1, no changes needed.
+
+ -- Holger Levsen <holger@debian.org>  Fri, 19 Oct 2018 20:56:58 +0200
+
+voctomix-outcasts (0.5.0-4) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * Migrate VCS to Salsa.
+
+  [ Holger Levsen ]
+  * Bump standards version to 4.1.4, no changes needed.
+
+ -- Holger Levsen <holger@debian.org>  Sat, 12 May 2018 13:58:58 +0000
+
+voctomix-outcasts (0.5.0-3) unstable; urgency=medium
+
+  * Fix typo in 0.5.0-1 changelog entry.
+  * Bump standards version to 4.1.2, no changes needed.
+
+ -- Holger Levsen <holger@debian.org>  Fri, 15 Dec 2017 13:06:45 +0000
+
+voctomix-outcasts (0.5.0-2) unstable; urgency=medium
+
+  * Re-upload 0.5.0-1, including 0.4.2-2's changes.
+    - Oops, I checked the wrong remote and missed Holger's upload.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 25 Nov 2017 15:17:13 +0000
+
+voctomix-outcasts (0.5.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - .ts videos are now ingestible (and loopable).
+    - New command: voctolight for running tally-lights.
+  * Update copyright.
+  * Declare Rules-Requires-Root: no
+  * Use dpkg's pkg-info.mk to parse debian/changelog.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 25 Nov 2017 15:01:46 +0000
+
+voctomix-outcasts (0.4.2-2) unstable; urgency=medium
+
+  * Bump standards version to 4.1.1, no changes needed.
+  * Bump debian/compat to 10 and build-depend on debhelper >= 10.2.5~.
+
+ -- Holger Levsen <holger@debian.org>  Sun, 01 Oct 2017 23:45:29 +0200
+
+voctomix-outcasts (0.4.2-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+    - PNG sequences should now loop.
+  * Recommends: gstreamer1.0-x, for overlaying timestamps on video.
+  * Bump Standards-Version to 4.0.0, no changes needed.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 04 Aug 2017 22:21:53 -0400
+
+voctomix-outcasts (0.4.1-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 11 Jan 2017 23:16:40 +1100
+
+voctomix-outcasts (0.4-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Add watch file.
+  * Bump copyright years.
+  * Add myself to uploaders.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 11 Jan 2017 20:42:31 +1100
+
+voctomix-outcasts (0.3+git20161201-1) unstable; urgency=medium
+
+  [ Holger Levsen ]
+  * New upstream git revision.
+
+  [ Stefano Rivera ]
+  * Use https for Vcs-Git URL.
+  * debian/copyright: fix license name, it's called Expat.
+  * wrap-and-sort debian/(control|copyright|voctomix-outcasts.(install|links))
+
+ -- Holger Levsen <holger@debian.org>  Fri, 02 Dec 2016 09:41:18 +0100
+
+voctomix-outcasts (0.3+git20161119-2) unstable; urgency=medium
+
+  * Correctly attribute Ryan Vermer in debian/copyright. (Closes: #845065)
+
+ -- Holger Levsen <holger@debian.org>  Sun, 20 Nov 2016 11:08:29 +0100
+
+voctomix-outcasts (0.3+git20161119-1) unstable; urgency=medium
+
+  * Initial upload. (Closes: #833700)
+  * Use arbitrary version number which is higher than 0.3 as CarlFK (upstream)
+    hasn't done any release yet but used version numbers for his local
+    releases…
+
+ -- Holger Levsen <holger@debian.org>  Sat, 19 Nov 2016 19:35:26 +0100

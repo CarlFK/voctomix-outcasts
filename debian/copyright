@@ -3,8 +3,11 @@ Upstream-Name: voctomix-outcasts
 Source: https://github.com/CarlFK/voctomix-outcasts
 
 Files: *
-Copyright: 2015,2016	Carl F. Karsten <carl@nextdayvideo.com>
-License: MIT
+Copyright: 2015-2020 Carl F. Karsten <carl@nextdayvideo.com>,
+                     Ryan Verner <ryan@nextdayvideo.com.au>,
+                     Stefano Rivera <stefanor@debian.org>,
+                     derpeter <vocend@derpeter.net>
+License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
@@ -24,7 +27,8 @@ License: MIT
  THE SOFTWARE.
 
 Files: debian/*
-Copyright: 2016 Holger Levsen <holger@debian.org>
+Copyright: 2016-2020 Holger Levsen <holger@debian.org>
+           2016-2020 Stefano Rivera <stefanor@debian.org>
 License: GPL-2+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -41,4 +45,3 @@ License: GPL-2+
  .
  On Debian systems, the complete text of the GNU General
  Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
-

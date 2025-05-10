@@ -1,40 +1,26 @@
 #!/usr/bin/make -f
 
 # Uncomment this to turn on verbose mode.
-# #export DH_VERBOSE=1
-#
+#export DH_VERBOSE=1
+
 %:
 	dh $@ --with python3
-
-override_dh_auto_build:
-	pandoc -o voctomix-outcasts.html README.md
-
-override_dh_auto_install:
-	dh_auto_install
-	# voctomix-outcasts
-	cp -r configs/* \
-	  	$(CURDIR)/debian/voctomix-outcasts/etc/voctomix/
-	cp -r ingest.py generate-cut-list.py record-mixed-av.sh \
-		record-timestamp.sh \
-		lib/ tests/ \
-	  	$(CURDIR)/debian/voctomix-outcasts/usr/share/voctomix/outcasts/
-	ln -s /usr/share/voctomix/outcasts/ingest.py \
-		$(CURDIR)/debian/voctomix-outcasts/usr/bin/ingest
-	ln -s /usr/share/voctomix/outcasts/generate-cut-list.py \
-		$(CURDIR)/debian/voctomix-outcasts/usr/bin/generate-cut-list
-	ln -s /usr/share/voctomix/outcasts/record-mixed-av.sh \
-		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-mixed-av
-	ln -s /usr/share/voctomix/outcasts/record-timestamp.sh \
-		$(CURDIR)/debian/voctomix-outcasts/usr/bin/record-timestamp
-
-override_dh_installdocs:
-	dh_installdocs
-
-override_dh_python3:
-	#
 
 override_dh_clean:
 	dh_clean
 	rm -f voctomix-outcasts.html debian/debhelper-build-stamp
 	rm -rf ./lib/__pycache__
 
+include /usr/share/dpkg/pkg-info.mk
+
+new-upstream-version: clean
+	mkdir -p $(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)/
+	rsync -av --delete --exclude=debian/ \
+	    --exclude=$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)/ \
+	    * $(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)/
+	find "$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)" \
+	    -xdev \( -type f -o -type l \) -print \
+	    | sort \
+	    | tar -cJaf "../$(DEB_SOURCE)_$(DEB_VERSION_UPSTREAM).orig.tar.xz" \
+	    -T- --owner=root --group=root --mode=a+rX
+	rm -r "$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)"
