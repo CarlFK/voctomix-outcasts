@@ -27,7 +27,7 @@ mkdir -p $dest_dir
 
 exec gst-launch-1.0 \
     --eos-on-shutdown \
-    tcpclientsrc host=10.20.2.7 port=11000 ! \
+    tcpclientsrc host=10.42.0.59 port=11000 ! \
     \
     matroskademux name=demux \
     \
