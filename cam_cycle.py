@@ -38,6 +38,7 @@ def sources_cycle(vc, sources, delay):
 
 
 def get_args():
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="""Vocto-cycle Client
@@ -55,11 +56,12 @@ def get_args():
     )
 
     parser.add_argument(
-        "--delay",
+        "--lap-time",
         action="store",
-        default=5,
+        default=20,
         type=int,
-        help="delay between source by this many seconds",
+        dest="lap_time",
+        help="time for one lap",
     )
 
     parser.add_argument(
@@ -87,9 +89,11 @@ def main():
     # Pull out the list of sources
     sources = conf["mix"]["sources"].split(",")
 
+    delay=args.lap_time / sources
+
     # send commands forever:
     voccmd = VocCmd(args.host, args.port, args.debug)
-    sources_cycle(voccmd, sources, args.delay)
+    sources_cycle(voccmd, sources, delay)
 
 
 if __name__ == "__main__":
