@@ -134,14 +134,22 @@ def mk_video_src(args, videocaps):
         video_src = args.video_source
 
     if args.debug:
-        # things to render as text ontop of test video
-        video_src += """ !
-    clockoverlay
-        text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
-        halignment=left line-alignment=left
-            """.format(hostname=socket.gethostname(),
-                    videocaps=videocaps,
-                    attribs=args.video_attribs)
+        # text to overlay on top of video
+
+        hostname=socket.gethostname()
+        text = f"Ingest Host: {hostname}\n"
+
+        text += f"--video-source: {args.video_source}\n"
+        if args.video_attribs:
+            text += f"video_attribs: {args.video_attribs}\n"
+
+        text += f"--audio-source: {args.audio_source}\n"
+        if args.audio_attribs:
+            text += f"audio_attribs: {args.audio_attribs}\n"
+
+        text += f"Server Caps: {videocaps}\n"
+
+        video_src += f' ! clockoverlay text="{text}" halignment=left line-alignment=left'
 
 
     if args.monitor:
