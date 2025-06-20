@@ -45,17 +45,7 @@ def mk_video_src(args, videocaps):
 
     if args.video_source == 'test':
 
-        video_src = """
-    videotestsrc name=videosrc {attribs}
-    """
-        # things to render as text ontop of test video
-        video_src += """ !
-    clockoverlay
-        text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
-        halignment=left line-alignment=left
-            """.format(hostname=socket.gethostname(),
-                    videocaps=videocaps,
-                    attribs=args.video_attribs)
+        video_src = "videotestsrc name=videosrc {attribs}"
 
     elif args.video_source == 'spacescope':
         # Stereo visualizer
@@ -142,6 +132,16 @@ def mk_video_src(args, videocaps):
         # What I wish I had done from the start.
         # similar to args.src, only just for the video part.
         video_src = args.video_source
+
+    if args.debug:
+        # things to render as text ontop of test video
+        video_src += """ !
+    clockoverlay
+        text="Source: {hostname}\nCaps: {videocaps}\nAttribs: {attribs}\n"
+        halignment=left line-alignment=left
+            """.format(hostname=socket.gethostname(),
+                    videocaps=videocaps,
+                    attribs=args.video_attribs)
 
 
     if args.monitor:
