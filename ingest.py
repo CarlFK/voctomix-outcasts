@@ -286,7 +286,7 @@ def mk_pipeline(args, server_caps, core_ip):
 
         # escape the ! because bash
         # asl2: ! is interpreted as a command history metacharacter
-        gst_cmd = gst_cmd.replace("!", " \! ")
+        gst_cmd = gst_cmd.replace("!", " \\! ")
 
         # remove all the \n to make it easy to cut/paste into shell
         gst_cmd = gst_cmd.replace("\n", " ")
