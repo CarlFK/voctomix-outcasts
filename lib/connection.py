@@ -11,7 +11,7 @@ import socket
    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
    copies of the Software, and to permit persons to whom the Software is
    furnished to do so, subject to the following conditions:
- 
+
    The above copyright notice and this permission notice shall be included in
    all copies or substantial portions of the Software.
 """
@@ -25,12 +25,12 @@ class Connection(object):
         self.host = host
         self.port = port
 
-        log.info('Establishing connection to %s', host)
+        log.info(f'Establishing connection to {host}:{port}')
         self.sock = socket.create_connection((host, port))
 
-        log.debug('Connection successful \o/')
+        log.debug('Connection successful \\o/')
         ip = self.sock.getpeername()[0]
-        log.debug('Remote-IP is %s', ip)
+        log.debug(f'Remote-IP is {ip}')
 
     def fetch_config(self):
         log.info('Reading server-config')
