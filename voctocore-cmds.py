@@ -19,6 +19,7 @@ def connect(host='localhost', port=9999):
 
     return fd
 
+
 def read_cmds(filename):
     """
     Read vocto commands from a file.
@@ -33,6 +34,7 @@ def read_cmds(filename):
 
     return cmds
 
+
 def vocto_send(fd, command: str):
     """Write commands to the voctocore control server
 
@@ -46,6 +48,7 @@ def vocto_send(fd, command: str):
     except socket.timeout as err:
         sys.exit(f'socket.timeout - There was a problem while sending {command} voctocore.'
                  'Giving up, bye.')
+
 
 def send_cmds(fd, cmds, verbose):
 
