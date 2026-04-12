@@ -23,6 +23,7 @@ Features:
 import argparse
 import socket
 import sys
+import time
 
 def connect(host='localhost', port=9999):
 
@@ -70,11 +71,12 @@ def vocto_send(fd, command: str):
                  'Giving up, bye.')
 
 
-def send_cmds(fd, cmds, verbose):
+def send_cmds(fd, cmds, delay, verbose):
 
     for cmd in cmds:
         if verbose: print( f'sending command: {cmd}' )
         vocto_send(fd, cmd)
+        time.sleep(delay)
 
 
 def get_args():
@@ -85,7 +87,7 @@ def get_args():
             ''')
 
     parser.add_argument(
-        '-c', '--cmds', action='append',
+        '-c', '--cmds', action='append', default=[],
         help="command to send to core.")
 
     parser.add_argument(
@@ -94,7 +96,7 @@ def get_args():
 
     parser.add_argument(
         '-v', '--verbose', action='count', default=0,
-        help="Also print INFO and DEBUG messages.")
+        help="print commands as they are sent.")
 
     parser.add_argument(
         '--host', action='store',
@@ -102,13 +104,16 @@ def get_args():
         help="hostname of vocto core")
 
     parser.add_argument(
-        '--port', action='store',
-        default=9999,
+        '--port', action='store', default=9999,
         help="port of vocto core")
 
     parser.add_argument(
+        '--delay', action='store', type=float, default=0,
+        help="delay in seconds between commands")
+
+    parser.add_argument(
         '--debug', action='store_true',
-        help="debugging things, like dump a  gst-launch-1.0 command")
+        help="debugging things, (currently nothing)")
 
     args = parser.parse_args()
 
@@ -122,12 +127,11 @@ def main():
 
     fd=connect(args.host, args.port)
 
+    cmds = args.cmds
     if args.file:
-        cmds = read_cmds(args.file)
-    else:
-        cmds = args.cmds
+        cmds.extend(read_cmds(args.file))
 
-    send_cmds(fd, cmds, args.verbose)
+    send_cmds(fd, cmds, args.delay, args.verbose)
 
     sys.exit()
 
