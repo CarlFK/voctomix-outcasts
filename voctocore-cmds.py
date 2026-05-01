@@ -105,6 +105,7 @@ def read_cmds(filename):
                 continue
             cmds.append(line)
 
+
     return cmds
 
 
