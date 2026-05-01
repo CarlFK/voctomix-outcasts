@@ -26,16 +26,24 @@ import sys
 import time
 
 
-def connect(host='localhost', port=9999, timeout=2):
+def connect(host='localhost', port=9999, timeout=2, wait=False):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-    try:
-        sock.connect((host, port))
-        sock.settimeout(timeout)
-    except ConnectionRefusedError:
-        sys.exit('ConnectionRefusedError - Voctocore not running?  Exiting bye.')
+    while True:
+        try:
+            sock.connect((host, port))
+            break
+        except ConnectionRefusedError:
+            if wait:
+                print('ConnectionRefusedError - Voctocore not running?  looping...')
+                time.sleep(2)
+                continue
+            else:
+                sys.exit('ConnectionRefusedError - Voctocore not running?  Exiting bye.')
+
+    sock.settimeout(timeout)
 
     return sock
 
@@ -75,7 +83,7 @@ def send_cmds(sock, cmds, delay, verbose):
         reply = vocto_io(sock, cmd)
 
         reply = reply.decode()
-        print(reply)
+        print(reply.strip("\n"))
 
         time.sleep(delay)
 
@@ -89,9 +97,13 @@ def read_cmds(filename):
         cmds = []
         for line in lines:
             line = line.strip()
-            # ignore blank lines.
-            if line:
-                cmds.append(line)
+            if not line:
+                # ignore blank lines.
+                continue
+            if line[0].startswith(("#",";")):
+                # ignore #/; comment or whatever # lines
+                continue
+            cmds.append(line)
 
     return cmds
 
@@ -133,6 +145,10 @@ def get_args():
         help="delay in seconds between commands")
 
     parser.add_argument(
+        '--wait-for-core', action='store_true',
+        help="loop forever when  can't connect to core.")
+
+    parser.add_argument(
         '--debug', action='store_true',
         help="debugging things, (currently nothing)")
 
@@ -153,7 +169,7 @@ def main():
     if args.verbose:
         print(f"{core_ip=}")
 
-    with connect(core_ip, args.port, args.timeout) as sock:
+    with connect(core_ip, args.port, args.timeout, args.wait_for_core) as sock:
         send_cmds(sock, cmds, args.delay, args.verbose)
 
     sys.exit()
