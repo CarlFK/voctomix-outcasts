@@ -31,17 +31,26 @@ def connect(host='localhost', port=9999, timeout=2, wait=False):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
+    fails=0
+    sleepy_time=2
+
     while True:
         try:
             sock.connect((host, port))
+            print(f"Connected: {host=} {port=}")
             break
         except ConnectionRefusedError:
             if wait:
-                print('ConnectionRefusedError - Voctocore not running?  looping...')
-                time.sleep(2)
+                fails+=1
+                print(f'ConnectionRefusedError - {fails=} {sleepy_time=} before looping...')
+                time.sleep(sleepy_time)
                 continue
             else:
                 sys.exit('ConnectionRefusedError - Voctocore not running?  Exiting bye.')
+
+    if fails:
+        print(f'{fails=} so sleep a little more just to be sure.')
+        time.sleep(sleepy_time)
 
     sock.settimeout(timeout)
 
