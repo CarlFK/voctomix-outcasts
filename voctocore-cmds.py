@@ -21,12 +21,19 @@ Features:
 """
 
 import argparse
+import logging
 import socket
 import sys
 import time
 
+logger = logging.getLogger(__name__)
 
 def connect(host='localhost', port=9999, timeout=2, wait=False):
+
+    logger.debug(f"Establishing Connection to {host=}")
+
+    host_ip = socket.gethostbyname(host)
+    logger.debug(f"{host_ip=}")
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
@@ -37,20 +44,21 @@ def connect(host='localhost', port=9999, timeout=2, wait=False):
     while True:
         try:
             sock.connect((host, port))
-            print(f"Connected: {host=} {port=}")
+            logger.debug(f"Connected: {sock.getpeername()=}")
             break
         except ConnectionRefusedError:
             if wait:
                 fails+=1
-                print(f'ConnectionRefusedError - {fails=} {sleepy_time=} before looping...')
+                logger.debug(f"ConnectionRefusedError - {fails=} {sleepy_time=} before looping...")
                 time.sleep(sleepy_time)
                 continue
             else:
                 sys.exit('ConnectionRefusedError - Voctocore not running?  Exiting bye.')
 
     if fails:
-        print(f'{fails=} so sleep a little more just to be sure.')
+        logger.debug(f"{fails=} so sleep a little more just to be sure.")
         time.sleep(sleepy_time)
+        logger.debug(f"Wake up and get to work.")
 
     sock.settimeout(timeout)
 
@@ -76,15 +84,15 @@ def vocto_io(sock, command: bytes):
 
 
 
-def send_cmds(sock, cmds, delay, verbose):
+def send_cmds(sock, cmds, delay):
     """Send a list of commands
     delay between each
     maybe echo before sending
-    print response
+    maybe print response
     """
 
     for cmd in cmds:
-        if verbose: print( f'sending: {cmd}' )
+        logger.info( f'sending: {cmd}' )
 
         cmd+="\n"
         cmd=cmd.encode()
@@ -92,7 +100,7 @@ def send_cmds(sock, cmds, delay, verbose):
         reply = vocto_io(sock, cmd)
 
         reply = reply.decode()
-        print(reply.strip("\n"))
+        logger.info(reply)
 
         time.sleep(delay)
 
@@ -117,6 +125,18 @@ def read_cmds(filename):
 
     return cmds
 
+def log_setup(verbose):
+
+    levels = { 4:logging.CRITICAL, 3:logging.DEBUG, 2:logging.INFO, 1:logging.WARNING, 0:logging.ERROR }
+    level = levels[verbose]
+
+    logging.basicConfig(
+            format='{asctime} {funcName}:{lineno} {levelname}: {message}',
+            datefmt='%H:%M:%S',
+            level=level,
+            style="{")
+
+
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -135,7 +155,7 @@ def get_args():
 
     parser.add_argument(
         '-v', '--verbose', action='count', default=0,
-        help="print commands as they are sent.")
+        help="print commands, replies and connection info.")
 
     parser.add_argument(
         '--host', action='store',
@@ -156,7 +176,7 @@ def get_args():
 
     parser.add_argument(
         '--wait-for-core', action='store_true',
-        help="loop forever when  can't connect to core.")
+        help="loop forever when can't connect to core.")
 
     parser.add_argument(
         '--debug', action='store_true',
@@ -171,16 +191,14 @@ def main():
 
     args = get_args()
 
+    log_setup(args.verbose)
+
     cmds = args.cmds
     if args.file:
         cmds.extend(read_cmds(args.file))
 
-    core_ip = socket.gethostbyname(args.host)
-    if args.verbose:
-        print(f"{core_ip=}")
-
-    with connect(core_ip, args.port, args.timeout, args.wait_for_core) as sock:
-        send_cmds(sock, cmds, args.delay, args.verbose)
+    with connect(args.host, args.port, args.timeout, args.wait_for_core) as sock:
+        send_cmds(sock, cmds, args.delay)
 
     sys.exit()
 
