@@ -1,0 +1,10 @@
+avenc_ac3 saves 2,4,6 channels fine.  8 no, but for now i 6 is all I need.
+
+Also maybe flacenc might deal with multi channel better
+Or wavenc if you're not fussed about space
+
+flacenc seems to expect specific channel layouts according to the template caps
+
+right, so you probably want to strip the channel layout stuff from it and make it layout=0 (or whatever makes it all channel positions 'none')
+
+

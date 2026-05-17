@@ -43,7 +43,7 @@ exec gst-launch-1.0 \
     demux. !\
         queue !\
         audioconvert !\
-        avenc_mp2 bitrate=192000 !\
+        avenc_ac3 bitrate=192000 !\
         queue !\
         mux.audio_0 \
     \
