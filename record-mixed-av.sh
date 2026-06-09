@@ -12,7 +12,7 @@
 # all copies or substantial portions of the Software.
 
 # $1 - destination dir. default: ~/Videos/date
-# files will be $dest_dir/$date/$time_000000.mov
+# files will be $dest_dir/$date/$time_000123.mkv
 
 # $2 - voctoocore host
 
@@ -54,11 +54,11 @@ exec gst-launch-1.0 \
         ! queue \
         ! mux.audio_0 \
     splitmuxsink name=mux \
+        max-size-time=${size_time} \
         use-robust-muxing=true \
-        muxer-factory=matroskamux \
-          muxer-properties="properties,streamable=true" \
-        location="${dest_dir}/$(date +%H_%M_%S)-%06d.mov" \
-        max-size-time=${size_time}
+          async-finalize=true \
+        muxer='mp4mux reserved-max-duration=15000000000 reserved-moov-update-period=1000000000 streamable=true' \
+        location="${dest_dir}/$(date +%H_%M_%S)-%06d.mkv" \
 
 #        muxer-factory=qtmux \
 #          async-finalize=true \
