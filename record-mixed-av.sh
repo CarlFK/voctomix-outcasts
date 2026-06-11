@@ -55,10 +55,13 @@ exec gst-launch-1.0 \
         ! mux.audio_0 \
     splitmuxsink name=mux \
         max-size-time=${size_time} \
-        use-robust-muxing=true \
-          async-finalize=true \
-        muxer='mp4mux reserved-max-duration=15000000000 reserved-moov-update-period=1000000000 streamable=true' \
-        location="${dest_dir}/$(date +%H_%M_%S)-%06d.mkv" \
+        muxer-factory=matroskamux \
+          muxer="matroskamux offset-to-zero=true" \
+        location="${dest_dir}/$(date +%H_%M_%S)-%06d.mkv"
+
+#        use-robust-muxing=true \
+#          async-finalize=true \
+#        muxer='mp4mux reserved-max-duration=15000000000 reserved-moov-update-period=1000000000 streamable=true' \
 
 #        muxer-factory=qtmux \
 #          async-finalize=true \
