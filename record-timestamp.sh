@@ -18,7 +18,7 @@
 
 
 # $1 - destination dir. default: ~/Videos
-# files will be $dest_dir/$date/$time.ts
+# files will be $dest_dir/$date/$time_00nn.mkv
 
 # dest_dir=${1:-~/Videos}/$(date +%Y-%m-%d)
 dest_dir=${1:-~/Videos}
