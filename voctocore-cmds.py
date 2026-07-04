@@ -173,16 +173,15 @@ def get_args():
     )
 
     parser.add_argument(
-        "--host", action="store", default="localhost", help="hostname of vocto core"
+        "--host", default="localhost", help="hostname of vocto core"
     )
 
     parser.add_argument(
-        "--port", action="store", default=9999, help="port of vocto core"
+        "--port", default=9999, help="Command port of vocto core"
     )
 
     parser.add_argument(
         "--timeout",
-        action="store",
         type=float,
         default=0.5,
         help="seconds to wait for reply from server, then abort",
@@ -190,7 +189,6 @@ def get_args():
 
     parser.add_argument(
         "--delay",
-        action="store",
         type=float,
         default=0,
         help="delay in seconds between commands",
