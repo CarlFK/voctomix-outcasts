@@ -50,7 +50,7 @@ def connect(host="localhost", port=9999, timeout=2, wait=False):
         except ConnectionRefusedError:
             if wait:
                 fails += 1
-                logger.debug(
+                logger.warning(
                     f"ConnectionRefusedError - {fails=} {sleepy_time=} before looping..."
                 )
                 time.sleep(sleepy_time)
@@ -61,9 +61,9 @@ def connect(host="localhost", port=9999, timeout=2, wait=False):
                 )
 
     if fails:
-        logger.debug(f"{fails=} so sleep a little more just to be sure.")
+        logger.warning(f"{fails=} so sleep a little more just to be sure.")
         time.sleep(sleepy_time)
-        logger.debug(f"Wake up and get to work.")
+        logger.warning(f"Wake up and get to work.")
 
     sock.settimeout(timeout)
 
@@ -106,7 +106,7 @@ def send_cmds(sock, cmds, delay):
         reply = vocto_io(sock, cmd)
 
         reply = reply.decode()
-        logger.info(reply)
+        logger.info(f"received: {reply}")
 
         time.sleep(delay)
 
@@ -134,11 +134,11 @@ def read_cmds(filename):
 def log_setup(verbose):
 
     levels = {
-        4: logging.CRITICAL,
-        3: logging.DEBUG,
-        2: logging.INFO,
-        1: logging.WARNING,
-        0: logging.ERROR,
+        4: logging.DEBUG,
+        3: logging.INFO,
+        2: logging.WARNING,
+        1: logging.ERROR,
+        0: logging.CRITICAL,
     }
     level = levels[verbose]
 
@@ -177,7 +177,7 @@ def get_args():
     )
 
     parser.add_argument(
-        "--port", default=9999, help="Command port of vocto core"
+        "--port", type=int, default=9999, help="Command port of vocto core"
     )
 
     parser.add_argument(
