@@ -28,92 +28,103 @@ import time
 
 logger = logging.getLogger(__name__)
 
+class VocCmd:
 
-def connect(host="localhost", port=9999, timeout=2, wait=False):
+    delay = 1
 
-    logger.debug(f"Establishing Connection to {host=}")
+    def __init__(self, host="localhost", port=9999, timeout=2, wait=False):
 
-    host_ip = socket.gethostbyname(host)
-    logger.debug(f"{host_ip=}")
+        logger.debug(f"Establishing Connection to {host=}")
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        host_ip = socket.gethostbyname(host)
+        logger.debug(f"{host_ip=}")
 
-    fails = 0
-    sleepy_time = 2
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-    while True:
+        fails = 0
+        sleepy_time = 2
+
+        while True:
+            try:
+                self.sock.connect((host, port))
+                logger.debug(f"Connected: {self.sock.getpeername()=}")
+                break
+            except ConnectionRefusedError:
+                if wait:
+                    fails += 1
+                    logger.warning(
+                        f"ConnectionRefusedError - {fails=} {sleepy_time=} before looping..."
+                    )
+                    time.sleep(sleepy_time)
+                    continue
+                else:
+                    sys.exit(
+                        "ConnectionRefusedError - Voctocore not running?  Exiting bye."
+                    )
+
+        if fails:
+            logger.warning(f"{fails=} so sleep a little more just to be sure.")
+            time.sleep(sleepy_time)
+            logger.warning(f"Wake up and get to work.")
+
+        self.sock.settimeout(timeout)
+
+        return None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.sock.close()
+
+
+
+    def vocto_io(self, command: bytes):
+        """Send a command to the voctocore control server
+        returnr response.
+
+        s: socket
+        command: voctocore command server command
+        """
         try:
-            sock.connect((host, port))
-            logger.debug(f"Connected: {sock.getpeername()=}")
-            break
-        except ConnectionRefusedError:
-            if wait:
-                fails += 1
-                logger.warning(
-                    f"ConnectionRefusedError - {fails=} {sleepy_time=} before looping..."
-                )
-                time.sleep(sleepy_time)
-                continue
-            else:
-                sys.exit(
-                    "ConnectionRefusedError - Voctocore not running?  Exiting bye."
-                )
+            self.sock.sendall(command)
+            data = self.sock.recv(10000)
 
-    if fails:
-        logger.warning(f"{fails=} so sleep a little more just to be sure.")
-        time.sleep(sleepy_time)
-        logger.warning(f"Wake up and get to work.")
+        except self.socket.timeout as err:
+            sys.exit(
+                f"socket.timeout - There was a problem while sending {command} voctocore."
+                "Giving up, bye."
+            )
 
-    sock.settimeout(timeout)
-
-    return sock
+        return data
 
 
-def vocto_io(sock, command: bytes):
-    """Send a command to the voctocore control server
-    returnr response.
+    def send_cmds(self, cmds):
+        """Send a list of commands
+        maybe echo before sending
+        self.delay between each
+        maybe print response
+        """
 
-    s: socket
-    command: voctocore command server command
-    """
-    try:
-        sock.sendall(command)
-        data = sock.recv(10000)
+        for cmd in cmds:
+            logger.info(f"sending: {cmd}")
 
-    except socket.timeout as err:
-        sys.exit(
-            f"socket.timeout - There was a problem while sending {command} voctocore."
-            "Giving up, bye."
-        )
+            cmd += "\n"
+            cmd = cmd.encode()
 
-    return data
+            reply = self.vocto_io(cmd)
 
+            reply = reply.decode()
+            logger.info(f"received: {reply}")
 
-def send_cmds(sock, cmds, delay):
-    """Send a list of commands
-    delay between each
-    maybe echo before sending
-    maybe print response
-    """
-
-    for cmd in cmds:
-        logger.info(f"sending: {cmd}")
-
-        cmd += "\n"
-        cmd = cmd.encode()
-
-        reply = vocto_io(sock, cmd)
-
-        reply = reply.decode()
-        logger.info(f"received: {reply}")
-
-        time.sleep(delay)
+            time.sleep(self.delay)
 
 
 def read_cmds(filename):
     """
     Read vocto commands from a file.
+    return list, exclude #commends and blank lines.
     """
     with open(filename) as f:
         lines = f.read().split("\n")
@@ -219,8 +230,9 @@ def main():
     if args.file:
         cmds.extend(read_cmds(args.file))
 
-    with connect(args.host, args.port, args.timeout, args.wait_for_core) as sock:
-        send_cmds(sock, cmds, args.delay)
+    with VocCmd(args.host, args.port, args.timeout, args.wait_for_core) as vc:
+        vc.delay = args.delay
+        vc.send_cmds(cmds)
 
     sys.exit()
 
