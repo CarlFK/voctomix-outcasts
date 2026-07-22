@@ -39,8 +39,9 @@ class VocCmd:
         host_ip = socket.gethostbyname(host)
         logger.debug(f"{host_ip=}")
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self.sock = socket.socket()
+        # self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
         fails = 0
         sleepy_time = 2
@@ -68,7 +69,8 @@ class VocCmd:
             time.sleep(sleepy_time)
             logger.warning(f"Wake up and get to work.")
 
-        self.sock.settimeout(timeout)
+        # self.sock.settimeout(timeout)
+        self.sock.settimeout(1)
 
         return None
 
@@ -87,15 +89,49 @@ class VocCmd:
         s: socket
         command: voctocore command server command
         """
+        logger.info(f"sending: {command}")
+
+        fd = self.sock.makefile('rw')
+        fd.write(command)
+        fd.flush()
+
+        data = fd.readline()
+        logger.debug(f"readline: {len(data)=}")
+
+        """
         try:
             self.sock.sendall(command)
-            data = self.sock.recv(10000)
-
-        except self.socket.timeout as err:
+        except socket.timeout as err:
             sys.exit(
                 f"socket.timeout - There was a problem while sending {command} voctocore."
                 "Giving up, bye."
             )
+
+
+        try:
+            bufsize = 10000
+            data = b''
+            # while len( recv := self.sock.recv(bufsize) ) > 0:
+            # while recv := self.sock.recv(bufsize) :
+            while True:
+                logger.debug(f"calling recv...")
+                recv = self.sock.recv(bufsize)
+                logger.debug(f"recv: {len(recv)=}")
+
+                if len(recv)==0:
+                    logger.debug(f"recv: 0 break")
+                    break
+
+                data += recv
+                logger.debug(f"recv: {len(data)=}")
+
+        except socket.timeout as err:
+            sys.exit(
+                f"socket.timeout - There was a problem while receiving from {command} voctocore.\n"
+                "Giving up, bye."
+            )
+
+        """
 
         return data
 
@@ -107,18 +143,24 @@ class VocCmd:
         maybe print response
         """
 
+        rets = []
+
         for cmd in cmds:
             logger.info(f"sending: {cmd}")
 
-            cmd += "\n"
-            cmd = cmd.encode()
+            # cmd += "\n"
+            # cmd = cmd.encode()
 
             reply = self.vocto_io(cmd)
 
-            reply = reply.decode()
+            # reply = reply.decode()
             logger.info(f"received: {reply}")
 
+            rets.append(reply)
+
             time.sleep(self.delay)
+
+        return rets
 
 
 def read_cmds(filename):
@@ -212,6 +254,12 @@ def get_args():
     )
 
     parser.add_argument(
+        "--prompt",
+        action="store_true",
+        help="repl after last command."
+    )
+
+    parser.add_argument(
         "--debug", action="store_true", help="debugging things, (currently nothing)"
     )
 
@@ -232,7 +280,9 @@ def main():
 
     with VocCmd(args.host, args.port, args.timeout, args.wait_for_core) as vc:
         vc.delay = args.delay
-        vc.send_cmds(cmds)
+        rets = vc.send_cmds(cmds)
+        if args.prompt:
+            print("import sys;sys.exit()"); import code; code.interact(local=locals())
 
     sys.exit()
 
