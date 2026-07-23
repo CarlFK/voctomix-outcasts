@@ -28,6 +28,7 @@ import time
 
 logger = logging.getLogger(__name__)
 
+
 class VocCmd:
 
     delay = 1
@@ -80,8 +81,6 @@ class VocCmd:
     def __exit__(self, type, value, traceback):
         self.sock.close()
 
-
-
     def vocto_io(self, command: bytes):
         """Send a command to the voctocore control server
         returnr response.
@@ -89,52 +88,33 @@ class VocCmd:
         s: socket
         command: voctocore command server command
         """
+        command += "\n"
         logger.info(f"sending: {command}")
 
-        fd = self.sock.makefile('rw')
-        fd.write(command)
-        fd.flush()
-
-        data = fd.readline()
-        logger.debug(f"readline: {len(data)=}")
-
-        """
         try:
-            self.sock.sendall(command)
+            fd = self.sock.makefile("rw")
         except socket.timeout as err:
             sys.exit(
                 f"socket.timeout - There was a problem while sending {command} voctocore."
                 "Giving up, bye."
             )
 
+        fd.write(command)
+
+        fd.flush()
 
         try:
-            bufsize = 10000
-            data = b''
-            # while len( recv := self.sock.recv(bufsize) ) > 0:
-            # while recv := self.sock.recv(bufsize) :
-            while True:
-                logger.debug(f"calling recv...")
-                recv = self.sock.recv(bufsize)
-                logger.debug(f"recv: {len(recv)=}")
-
-                if len(recv)==0:
-                    logger.debug(f"recv: 0 break")
-                    break
-
-                data += recv
-                logger.debug(f"recv: {len(data)=}")
-
+            line = fd.readline()
         except socket.timeout as err:
             sys.exit(
-                f"socket.timeout - There was a problem while receiving from {command} voctocore.\n"
+                f"socket.timeout - There was a problem while reading response to {command}."
+                f"{err=}\n"
                 "Giving up, bye."
             )
 
-        """
+        logger.debug(f"readline: {len(line)=}")
 
-        return data
-
+        return line
 
     def send_cmds(self, cmds):
         """Send a list of commands
@@ -225,9 +205,7 @@ def get_args():
         help="print commands, replies and connection info.",
     )
 
-    parser.add_argument(
-        "--host", default="localhost", help="hostname of vocto core"
-    )
+    parser.add_argument("--host", default="localhost", help="hostname of vocto core")
 
     parser.add_argument(
         "--port", type=int, default=9999, help="Command port of vocto core"
@@ -254,9 +232,7 @@ def get_args():
     )
 
     parser.add_argument(
-        "--prompt",
-        action="store_true",
-        help="repl after last command."
+        "--prompt", action="store_true", help="repl after last command."
     )
 
     parser.add_argument(
@@ -282,7 +258,10 @@ def main():
         vc.delay = args.delay
         rets = vc.send_cmds(cmds)
         if args.prompt:
-            print("import sys;sys.exit()"); import code; code.interact(local=locals())
+            print("import sys;sys.exit()")
+            import code
+
+            code.interact(local=locals())
 
     sys.exit()
 

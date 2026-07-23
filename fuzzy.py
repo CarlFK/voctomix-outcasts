@@ -1,4 +1,3 @@
-
 import json
 
 import logging
@@ -15,25 +14,26 @@ logger = logging.getLogger(__name__)
 def get_sources(host):
 
     with VocCmd(host=host) as vc:
-        ret = vc.vocto_io('get_config\n')
+        ret = vc.vocto_io("get_config\n")
 
     logger.info(f"got: {ret}")
 
-    cmd,conf = ret.split(' ',1)
+    cmd, conf = ret.split(" ", 1)
     assert cmd == "server_config"
 
     conf = json.loads(conf)
     pprint(conf)
 
     pprint(conf.keys())
-    sources = conf['mix']['sources'] # 'Gst,Test'
+    sources = conf["mix"]["sources"]  # 'Gst,Test'
     pprint(sources)
-    sources = sources.split(',')
+    sources = sources.split(",")
     pprint(sources)
 
-    transistions = conf['transitions']
+    transistions = conf["transitions"]
 
     return (transistions, sources)
+
 
 def cycle_sources(host, transitions, sources):
 
@@ -41,26 +41,25 @@ def cycle_sources(host, transitions, sources):
 
         while True:
 
-            errors=set()
+            errors = set()
             for i, transition in enumerate(transitions):
                 for source_a in sources:
                     for source_b in sources:
                         if source_a != source_b:
                             cmd = f"transition {transition}({source_a},{source_b})"
-                            cmd += "\n"
                             ret = vc.vocto_io(cmd)
                             print(ret)
-                            rets = ret.split(' ',1)
+                            rets = ret.split(" ", 1)
                             if rets[0] == "error":
                                 logger.info(f"appending: {transition}")
                                 errors.add(transition)
-                                break # can we break(2)?
-
-                time.sleep(1)
+                                break  # can we break(2)?
+                            time.sleep(1)
 
             for error in errors:
                 logger.info(f"deleting: {error}")
-                del(transitions[error])
+                del transitions[error]
+
 
 def log_setup(level):
     logging.basicConfig(
@@ -71,11 +70,14 @@ def log_setup(level):
     )
 
 
-if __name__=='__main__':
+def main():
     log_setup(4)
-    host="10.9.2.146"
-    host="localhost"
+    host = "localhost"
+    host = "10.9.2.146"
 
     transistions, sources = get_sources(host)
     cycle_sources(host, transistions, sources)
 
+
+if __name__ == "__main__":
+    main()
