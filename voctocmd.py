@@ -164,7 +164,7 @@ def read_cmds(filename):
     return cmds
 
 
-def log_setup(verbose):
+def log_setup(verbose, logger=logger):
 
     levels = {
         4: logging.DEBUG,
