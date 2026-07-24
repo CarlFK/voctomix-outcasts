@@ -1,43 +1,30 @@
 import json
-
 import logging
-
 import time
 
 from pprint import pprint
 
-from voctocmd import VocCmd
+from voctocmd import VocCmd, get_args, log_setup
 
 logger = logging.getLogger(__name__)
 
 
-def get_sources(host):
+def get_conf(vc):
 
-    with VocCmd(host=host) as vc:
-        ret = vc.vocto_io("get_config\n")
+    ret = vc.vocto_io("get_config")
 
-    logger.info(f"got: {ret}")
+    logger.debug(f"got: {ret}")
 
     cmd, conf = ret.split(" ", 1)
     assert cmd == "server_config"
 
     conf = json.loads(conf)
-    pprint(conf)
 
-    pprint(conf.keys())
-    sources = conf["mix"]["sources"]  # 'Gst,Test'
-    pprint(sources)
-    sources = sources.split(",")
-    pprint(sources)
-
-    transistions = conf["transitions"]
-
-    return (transistions, sources)
+    return conf
 
 
-def cycle_sources(host, transitions, sources):
 
-    with VocCmd(host=host) as vc:
+def cycle_sources(vc, transitions, sources):
 
         while True:
 
@@ -48,7 +35,7 @@ def cycle_sources(host, transitions, sources):
                         if source_a != source_b:
                             cmd = f"transition {transition}({source_a},{source_b})"
                             ret = vc.vocto_io(cmd)
-                            print(ret)
+                            logger.info(f"core says: {ret}")
                             rets = ret.split(" ", 1)
                             if rets[0] == "error":
                                 logger.info(f"appending: {transition}")
@@ -56,27 +43,37 @@ def cycle_sources(host, transitions, sources):
                                 break  # can we break(2)?
                             time.sleep(1)
 
+            # remove things that core says "error"
             for error in errors:
                 logger.info(f"deleting: {error}")
                 del transitions[error]
 
 
-def log_setup(level):
-    logging.basicConfig(
-        format="{asctime} {funcName}:{lineno} {levelname}: {message}",
-        datefmt="%H:%M:%S",
-        level=level,
-        style="{",
-    )
-
-
 def main():
-    log_setup(4)
-    host = "localhost"
-    host = "10.9.2.146"
 
-    transistions, sources = get_sources(host)
-    cycle_sources(host, transistions, sources)
+    args = get_args()
+
+    log_setup(args.verbose)
+
+    # I have plans for this...  maybe.
+    # cmds = args.cmds
+    # if args.file:
+    #    cmds.extend(read_cmds(args.file))
+
+    with VocCmd(args.host, args.port, args.timeout, args.wait_for_core) as vc:
+        vc.delay = args.delay
+
+        conf = get_conf(vc)
+        logger.debug(f"{conf.keys()}")
+
+        sources = conf["mix"]["sources"]  # 'Gst,Test'
+        logger.debug(f"{sources}")
+        sources = sources.split(",")
+        logger.debug(f"{sources}")
+
+        transistions = conf["transitions"]
+
+        cycle_sources(vc, transistions, sources)
 
 
 if __name__ == "__main__":
