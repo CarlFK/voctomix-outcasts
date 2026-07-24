@@ -54,6 +54,7 @@ def main():
     args = get_args()
 
     log_setup(args.verbose)
+    log_setup(args.verbose, logger)
 
     # I have plans for this...  maybe.
     # cmds = args.cmds
