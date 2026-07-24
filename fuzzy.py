@@ -6,7 +6,7 @@ import time
 
 from pprint import pprint
 
-from voctocore_cmds import VocCmd
+from voctocmd import VocCmd
 
 logger = logging.getLogger(__name__)
 
