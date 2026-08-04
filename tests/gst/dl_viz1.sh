@@ -21,7 +21,7 @@ gst-launch-1.0  \
 sleep 1
 wmctrl -r "gst-launch-1.0" -b add,fullscreen
 
-# bring gst command back to the foregound so we can ^c it
-# (doesn't work)
-fg
+# ^c to kill gst-launch
+wait
+
 
