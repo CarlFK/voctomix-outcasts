@@ -1,0 +1,111 @@
+#cloud-config
+
+# Set the hostname for this device.
+# This will also update /etc/hosts if manage_etc_hosts is enabled.
+hostname: pi4hdmi
+manage_etc_hosts: true
+
+# Set the system timezone
+timezone: Europe/London
+
+# Create a default user account and apply permissions
+users:
+  - name: pi
+    groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
+    shell: /bin/bash
+    lock_passwd: false  # Set to true to disable password login entirely
+    plain_text_password: x  # Alternatively, use 'passwd:' with a hashed password for better security
+    ssh_authorized_keys:
+      - ssh-ed25519 mykeystuff  # Replace with your actual SSH public key
+      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqtgmp7GiXFgKW2+Yib+uyWZuD/cQsus8eqgavCSR+WGZlMrUldTLKYhzj71Ym6jupo0R/nr0mHlJ9mPVFr9KOJkUXb9n5/J4sYEpMKunv8i8Peu0ld7nmZRFUVSUlbMfPF4DKZ6marjuNloKbVlKF8nZGgjUuqBzRcKH90XubYJ5tpjbdyBlwoSEXLEqWrcpwBYgfg8z7P2qA/uoywki0tzrMz15M9iSD8pJ0MeKZg1xJznnkEY9ebMcTbxACCcAqH9qLIPoGoeNkUJnikkulBla4KsTB7uEO5rcrHkM65avVUocm0W6b2xOJn2GVIxBNGNC8sSbyDLAm9avJrfRUw== carl@dc10
+
+    sudo: ALL=(ALL) NOPASSWD:ALL  # Allow passwordless sudo for this user
+
+# Raspberry Pi–specific options (provided by the cc_raspberry_pi module)
+rpi:
+  spi: false               # Enable SPI interface
+  i2c: false               # Enable I2C interface
+  serial: true            # Enable serial console and UART interface
+  onewire: false           # Enable 1-Wire interface
+  enable_usb_gadget: true # Enable USB gadget mode
+
+
+# Additional Raspberry Pi OS option (not available on generic cloud-init images)
+enable_ssh: true  # Enables the SSH server on first boot
+
+# Optional: Disable SSH password authentication if using SSH keys only (recommended for security)
+# ssh_pwauth: false
+
+
+## Set up the keyboard layout. See localectl(1), in particular the various
+## list-x11-* sub-commands, to determine the available models, layouts,
+## variants, and options
+keyboard:
+  model: pc105
+  layout: us
+#  variant:
+#  options: ctrl:nocaps
+
+## On first boot, use ssh-import-id to give the specific users SSH access to
+## the default user
+ssh_import_id:
+  - lp:carlfk
+  - gh:sdroege
+
+## Add users and groups to the system, and import keys with the ssh-import-id
+## utility
+#groups:
+#- robot: [robot]
+#- robotics: [robot]
+#- pi
+#
+#users:
+#- default
+#- name: robot
+#  gecos: Mr. Robot
+#  primary_group: robot
+#  groups: users
+#  ssh_import_id: foobar
+#  lock_passwd: false
+#  passwd: $5$hkui88$nvZgIle31cNpryjRfO9uArF7DYiBcWEnjqq7L1AQNN3
+
+## Update apt database and upgrade packages on first boot
+package_update: true
+package_upgrade: true
+
+## Install additional packages on first boot
+packages:
+  - gstreamer1.0-tools
+  - gst-plugins-base
+  - sshfs
+  - sidedoor
+
+
+## Write arbitrary files to the file-system (including binaries!)
+#write_files:
+#- path: /etc/default/console-setup
+#  content: |
+#    # Consult the console-setup(5) manual page.
+#    ACTIVE_CONSOLES="/dev/tty[1-6]"
+#    CHARMAP="UTF-8"
+#    VIDEOMODE=
+#    FONT="Lat15-Terminus18x10.psf.gz"
+#    FONTFACE=
+#    FONTSIZE=
+#    CODESET="Lat15"
+#  permissions: '0644'
+#  owner: root:root
+#- encoding: gzip
+#  path: /root/Makefile
+#  content: !!binary |
+#    H4sICF2DTWIAA01ha2VmaWxlAFNWCM8syVBILMjPyU/PTC1WKMlXiPB2dlFQNjSx5MpNteLi
+#    dLDiSoRQxYl5KeWZyRkgXrSCkoqKRmaKgm6pppKCbmqhgoFCrIKamkK1QmpyRr6Ckn92YqWS
+#    NdC80uQMBZhOa4VahZoaqIrwjMQSewXfxOxUhcwShcr80qLi1Jw0RSUuAIYfEJmVAAAA
+#  owner: root:root
+#  permissions: '0644'
+
+## Run arbitrary commands at rc.local like time
+runcmd:
+  - [ ip, r ]
+  - [ wget, https://raw.githubusercontent.com/CarlFK/voctomix-outcasts/refs/heads/master/tests/gst/dl_src.sh ]
+  - [ chmod, u+x, dl_src.sh ]

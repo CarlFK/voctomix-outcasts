@@ -1,0 +1,17 @@
+network:
+  version: 2
+  wifis:
+    # Make sure the target is NetworkManager which is the default on Raspberry Pi OS
+    renderer: NetworkManager
+    # The connection name
+    wlan0:
+      dhcp4: true
+      # !VERY IMPORTANT! Change this to the ISO/IEC 3166 country code for the country you want to use this microSD card in.
+      regulatory-domain: "US"
+      access-points:
+        "ಠ_ಠ":
+          password: "goofymini"
+        "PumpingStationOne":
+          password: "ps1frocks"
+      # Don’t wait at boot for this connection to connect successfully
+      optional: true
