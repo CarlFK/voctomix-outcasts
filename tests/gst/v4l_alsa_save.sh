@@ -3,10 +3,12 @@
 fname=$(mktemp --suffix=.ts)
 
 # 20 seconds * 30fps
-nb=$((20*30))
+nb=$((2*300))
+
 # I don't understand how to make this stop at 20 sec, this is close
 # The resulting file has more audio over the last video frame repeated, I guess.
-nb2=$(( ${nb} * 3 ))
+nb2=$((2*441))
+nb2=441
 
 gst-launch-1.0  \
     -v \
