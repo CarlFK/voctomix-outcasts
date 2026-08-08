@@ -7,4 +7,4 @@ These 3 scripts get run on the 3 machines:
 
 * dl_src.sh - cnt1 to play tone and flip between 1080i/p
 * dl_viz1.sh - gator - visulize aduio from decklinkaudiosrc
-* dl_viz_save.sh - use a simple hdmi capture to save vizulazion and audio
+* v4l_alsa_save.sh and dl_viz_save.sh - use another hdmi capture (usb) to save vizulazion and audio
