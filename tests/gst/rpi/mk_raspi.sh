@@ -15,11 +15,11 @@
 
 img_host=https://downloads.raspberrypi.org
 
-# img_path=raspios_armhf/images/raspios_armhf-2026-06-19
-# zip_name=2026-06-18-raspios-trixie-armhf.img.xz
+img_path=raspios_armhf/images/raspios_armhf-2026-06-19
+zip_name=2026-06-18-raspios-trixie-armhf.img.xz
 
-img_path=raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19
-zip_name=2026-06-18-raspios-trixie-armhf-lite.img.xz
+# img_path=raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19
+# zip_name=2026-06-18-raspios-trixie-armhf-lite.img.xz
 
 # Destination
 # cash dir to store 1.3 gig img.xz
@@ -48,7 +48,7 @@ fi
 wget -N --directory-prefix=${cache} ${img_host}/${img_path}/${zip_name}
 
 # decompress the image file and stream it to the sd card:
-xz --decompress --stdout ${cache}/${zip_name}|sudo dd status=progress of=${dev}
+xz --decompress --stdout ${cache}/${zip_name}|sudo dd status=progress bs=4M of=${dev}
 
 # part 3:
 #
