@@ -84,6 +84,7 @@ packages:
   - sidedoor
   - vim
   - tmux
+  - tree
 
 
 ## Write arbitrary files to the file-system (including binaries!)

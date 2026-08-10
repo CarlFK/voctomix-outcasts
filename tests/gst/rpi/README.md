@@ -2,4 +2,5 @@ mk_raspi.sh - main script to download img, dd it to sd card, add cloud-init file
 cache/ - dir to hold raspios-trixie-armhf.img.xz
 network-config - cloud-init networking
 user-data - main cloud-init - keyboard, users, ssh keys, commands to wget/setup HDMI test feed
+cmdline.txt - mostly to enable watching boot logs for debugging
 dl_src.service - runs ../dl_src.sh on boot. (it would if the systemctl enable worked)

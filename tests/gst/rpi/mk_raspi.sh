@@ -18,6 +18,7 @@ img_host=https://downloads.raspberrypi.org
 img_path=raspios_armhf/images/raspios_armhf-2026-06-19
 zip_name=2026-06-18-raspios-trixie-armhf.img.xz
 
+# (don't forget to put the correct root=PARTUUID=c84a06f0-02
 # img_path=raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19
 # zip_name=2026-06-18-raspios-trixie-armhf-lite.img.xz
 
@@ -55,7 +56,7 @@ xz --decompress --stdout ${cache}/${zip_name}|sudo dd status=progress bs=4M of=$
 pmount ${part}
 
 # clout-init config - networking, users, apt install...
-cp network-config user-data ${mnt}
+cp cmdline.txt network-config user-data ${mnt}
 
 # copy this script so later we know what built the image
 cp $0 ${mnt}
