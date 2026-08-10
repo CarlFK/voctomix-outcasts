@@ -8,7 +8,8 @@
 # 3. copy clound-init files to destination
 
 # part 1:
-#
+
+# source:
 # https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2026-06-19/2026-06-18-raspios-trixie-armhf.img.xz
 # https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19/2026-06-18-raspios-trixie-armhf-lite.img.xz
 
@@ -20,8 +21,14 @@ img_host=https://downloads.raspberrypi.org
 img_path=raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19
 zip_name=2026-06-18-raspios-trixie-armhf-lite.img.xz
 
+# Destination
+# cash dir to store 1.3 gig img.xz
+cache=cache
+
+# dev of SD card to image (Danger Will Robinson!)
 dev=/dev/sda
 part=sda1
+# where pmount will mount it
 mnt=/media/${part}
 
 if [ ! -b "${dev}" ]; then
@@ -33,9 +40,6 @@ if findmnt --source /dev/${part}; then
       echo "error: ${dev} has mounted fs's."
       exit
 fi
-
-# dir to store 400M compressed image file
-cache=cache
 
 # part 2:
 #

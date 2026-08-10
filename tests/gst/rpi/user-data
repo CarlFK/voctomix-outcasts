@@ -80,6 +80,8 @@ packages:
   - gst-plugins-base
   - sshfs
   - sidedoor
+  - vim
+  - tmux
 
 
 ## Write arbitrary files to the file-system (including binaries!)
@@ -107,6 +109,10 @@ packages:
 
 ## Run arbitrary commands at rc.local like time
 runcmd:
-  - [ ip, r ]
   - [ wget, https://raw.githubusercontent.com/CarlFK/voctomix-outcasts/refs/heads/master/tests/gst/dl_src.sh ]
+  - [ chown, pi:, dl_src.sh ]
   - [ chmod, u+x, dl_src.sh ]
+  - [ mv, dl_src.sh, /home/pi ]
+  - [ wget, https://raw.githubusercontent.com/CarlFK/voctomix-outcasts/refs/heads/master/tests/gst/rpi/dl_src.service ]
+  - [ mv, dl_src.service, /etc/systemd/user ]
+  - [ systemctl, --user, enable, dl_src.service ]
