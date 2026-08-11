@@ -7,7 +7,4 @@ gst-launch-1.0  \
  decklinkvideosrc device-number=0 mode=1080p30 \
  ! fakesink \
  decklinkaudiosrc device-number=0 \
-  ! queue \
-  ! volume volume=.2  \
-  ! autoaudiosink
-
+ ! autoaudiosink
