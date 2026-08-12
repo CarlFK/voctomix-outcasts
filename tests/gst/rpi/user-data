@@ -118,3 +118,4 @@ runcmd:
   - [ wget, https://raw.githubusercontent.com/CarlFK/voctomix-outcasts/refs/heads/master/tests/gst/rpi/dl_src.service ]
   - [ mv, dl_src.service, /etc/systemd/user ]
   - [ systemctl, --global, enable, dl_src ]
+  - [ systemctl, daemon-reload ]
