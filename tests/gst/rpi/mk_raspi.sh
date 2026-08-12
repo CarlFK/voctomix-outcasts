@@ -1,8 +1,22 @@
 #!/bin/bash -ex
 
 # mkpi.sh - flashes and configs an SD card for pi
+# usage: ./mkpi.sh <dev> [fat_part] [fat_mount]
+# dev - SD card to image (Danger Will Robinson!)
+# fat_part - partition dev where boot loader and clound-init look for files
+# fat_mount - mountpoint where pmount will mount fat_part
 
-# 3 part:
+# easy example:
+# ./mkpi.sh /dev/sda
+
+# long example
+# ./mkpi.sh /dev/mmcblk0 /dev/mmcblk0p1 /run/media/carl/bootfs
+
+dev=${1}
+fat_part=${2:-${1}1}
+fat_mount=${3:-/media/${fat_part#/dev/}}
+
+# 3 parts:
 # 1. init - define source and destination, make sure destination isn't mounted.
 # 2. download and burn to destination
 # 3. copy clound-init files to destination
@@ -26,18 +40,12 @@ zip_name=2026-06-18-raspios-trixie-armhf.img.xz
 # cash dir to store 1.3 gig img.xz
 cache=cache
 
-# dev of SD card to image (Danger Will Robinson!)
-dev=/dev/sda
-part=sda1
-# where pmount will mount it
-mnt=/media/${part}
-
 if [ ! -b "${dev}" ]; then
       echo "error: ${dev} is not a block device."
       exit
 fi
 
-if findmnt --source /dev/${part}; then
+if findmnt --source ${fat_part}; then
       echo "error: ${dev} has mounted fs's."
       exit
 fi
@@ -53,12 +61,13 @@ xz --decompress --stdout ${cache}/${zip_name}|sudo dd status=progress bs=4M of=$
 
 # part 3:
 #
-pmount ${part}
+# copy config files to fat partition
+pmount ${fat_part}
 
 # clout-init config - networking, users, apt install...
-cp cmdline.txt network-config user-data ${mnt}
+cp cmdline.txt network-config user-data ${fat_mount}
 
 # copy this script so later we know what built the image
-cp $0 ${mnt}
+cp $0 ${fat_mount}
 
-pumount ${part}
+pumount ${fat_part}
