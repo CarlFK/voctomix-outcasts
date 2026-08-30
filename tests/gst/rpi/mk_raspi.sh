@@ -5,16 +5,21 @@
 # dev - SD card to image (Danger Will Robinson!)
 # fat_part - partition dev where boot loader and clound-init look for files
 # fat_mount - mountpoint where pmount will mount fat_part
+# ext_part - partition dev of root fs
+# ext_mount - mountpoint where pmount will mount ext_part
 
 # easy example:
 # ./mkpi.sh /dev/sda
 
 # long example
-# ./mkpi.sh /dev/mmcblk0 /dev/mmcblk0p1 /run/media/carl/bootfs
+# ./mkpi.sh /dev/mmcblk0 /dev/mmcblk0p1 /run/media/carl/bootfs /dev/mmcblk0p2 /run/media/carl/rootfs
 
 dev=${1}
 fat_part=${2:-${1}1}
 fat_mount=${3:-/media/${fat_part#/dev/}}
+ext_part=${4:-${1}2}
+ext_mount=${5:-/media/${ext_part#/dev/}}
+
 
 # 3 parts:
 # 1. init - define source and destination, make sure destination isn't mounted.
@@ -29,12 +34,12 @@ fat_mount=${3:-/media/${fat_part#/dev/}}
 
 img_host=https://downloads.raspberrypi.org
 
-img_path=raspios_armhf/images/raspios_armhf-2026-06-19
-zip_name=2026-06-18-raspios-trixie-armhf.img.xz
+# img_path=raspios_armhf/images/raspios_armhf-2026-06-19
+# zip_name=2026-06-18-raspios-trixie-armhf.img.xz
 
-# (don't forget to put the correct root=PARTUUID=c84a06f0-02
-# img_path=raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19
-# zip_name=2026-06-18-raspios-trixie-armhf-lite.img.xz
+# (don't forget to put the correct root=PARTUUID=c84a06f0-02 in cmdline.txt unless ROOT=root=/dev/mmcblk0p2 works :p
+img_path=raspios_lite_armhf/images/raspios_lite_armhf-2026-06-19
+zip_name=2026-06-18-raspios-trixie-armhf-lite.img.xz
 
 # Destination
 # cash dir to store 1.3 gig img.xz
@@ -63,6 +68,7 @@ xz --decompress --stdout ${cache}/${zip_name}|sudo dd status=progress bs=4M of=$
 #
 # copy config files to fat partition
 pmount ${fat_part}
+pmount ${ext_part}
 
 # clout-init config - networking, users, apt install...
 cp cmdline.txt network-config user-data ${fat_mount}
@@ -70,4 +76,7 @@ cp cmdline.txt network-config user-data ${fat_mount}
 # copy this script so later we know what built the image
 cp $0 ${fat_mount}
 
+sudo touch /${ext_mount}/var/lib/systemd/timesync/clock
+
 pumount ${fat_part}
+pumount ${ext_part}

@@ -112,10 +112,6 @@ packages:
 #  owner: root:root
 #  permissions: '0644'
 
-# run asap (before just about everything)
-bootcmd:
-  - /usr/bin/date --set="$(date --reference=/boot/firmware/user-data  --iso-8601=hours)"
-
 ## Run arbitrary commands at rc.local like time
 runcmd:
   - [ wget, https://raw.githubusercontent.com/CarlFK/voctomix-outcasts/refs/heads/master/tests/gst/dl_src.sh ]
