@@ -14,7 +14,7 @@ users:
     groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
     shell: /bin/bash
     lock_passwd: false  # Set to true to disable password login entirely
-    plain_text_password: x  # Alternatively, use 'passwd:' with a hashed password for better security
+    plain_text_passwd: x # Alternatively, use 'passwd:' with a hashed password for better security
     ssh_authorized_keys:
       - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqtgmp7GiXFgKW2+Yib+uyWZuD/cQsus8eqgavCSR+WGZlMrUldTLKYhzj71Ym6jupo0R/nr0mHlJ9mPVFr9KOJkUXb9n5/J4sYEpMKunv8i8Peu0ld7nmZRFUVSUlbMfPF4DKZ6marjuNloKbVlKF8nZGgjUuqBzRcKH90XubYJ5tpjbdyBlwoSEXLEqWrcpwBYgfg8z7P2qA/uoywki0tzrMz15M9iSD8pJ0MeKZg1xJznnkEY9ebMcTbxACCcAqH9qLIPoGoeNkUJnikkulBla4KsTB7uEO5rcrHkM65avVUocm0W6b2xOJn2GVIxBNGNC8sSbyDLAm9avJrfRUw== carl@dc10
     sudo: ALL=(ALL) NOPASSWD:ALL  # Allow passwordless sudo for this user
@@ -32,6 +32,7 @@ rpi:
 
 # Additional Raspberry Pi OS option (not available on generic cloud-init images)
 enable_ssh: true  # Enables the SSH server on first boot
+disable_root: false
 
 
 
@@ -46,6 +47,7 @@ keyboard:
 
 ## On first boot, use ssh-import-id to give the specific users SSH access to
 ## the default user
+# https://docs.cloud-init.io/en/18.3/topics/modules.html#ssh-import-id
 ssh_import_id:
   - lp:carlfk
   - gh:mithro
@@ -110,6 +112,10 @@ packages:
 #  owner: root:root
 #  permissions: '0644'
 
+# run asap (before just about everything)
+bootcmd:
+  - /usr/bin/date --set="$(date --reference=/boot/firmware/user-data  --iso-8601=hours)"
+
 ## Run arbitrary commands at rc.local like time
 runcmd:
   - [ wget, https://raw.githubusercontent.com/CarlFK/voctomix-outcasts/refs/heads/master/tests/gst/dl_src.sh ]
@@ -119,3 +125,14 @@ runcmd:
   - [ mv, dl_src.service, /etc/systemd/user ]
   - [ systemctl, --global, enable, dl_src ]
   - [ systemctl, daemon-reload ]
+
+    # 1. Enable lingering so the user service runs on boot without an active SSH login
+  - loginctl enable-linger pi
+
+  # 2. Reload the user's personal systemd manager, enable, and start the service
+  - sudo -u pi XDG_RUNTIME_DIR=/run/user/$(id -u pi) systemctl --user daemon-reload
+  - sudo -u pi XDG_RUNTIME_DIR=/run/user/$(id -u pi) systemctl --user enable dl_src
+  - sudo -u pi XDG_RUNTIME_DIR=/run/user/$(id -u pi) systemctl --user start dl_src
+
+final_message: Noisy HDMI source cloud-init done.
+
